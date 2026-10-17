@@ -1,0 +1,244 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #fff;
+  font-family: 'Times New Roman', Times, serif;
+  color: #000;
+}
+
+#shell {
+  position: fixed;
+  inset: 0;
+}
+
+#stage canvas {
+  display: block;
+  cursor: grab;
+}
+#stage canvas:active {
+  cursor: grabbing;
+}
+
+/* corner buttons */
+
+#menuBtn,
+#soundBtn {
+  position: fixed;
+  bottom: 20px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.88);
+  border: 0px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  user-select: none;
+  z-index: 20;
+  transition: background 0.15s ease;
+}
+#menuBtn:hover,
+#soundBtn:hover {
+  background: blue;
+  color: #fff;
+}
+
+#menuBtn { left: 20px; }
+#soundBtn { right: 20px; font-size: 14px; }
+
+/* hidden controls panel */
+
+#panel {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  width: 350px;
+  max-width: calc(100vw - 40px);
+  max-height: 0;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 6px;
+  padding: 0 16px;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: max-height 0.25s ease, opacity 0.18s ease, transform 0.18s ease, padding 0.25s ease;
+  font-size: 14px;
+  line-height: 1.5;
+  z-index: 19;
+  box-sizing: border-box;
+}
+#panel.open {
+  max-height: 80vh;
+  opacity: 1;
+  transform: translateY(0);
+  padding: 16px;
+  overflow-y: auto;
+  margin-bottom: 45px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.label {
+  min-width: 100%;
+  color: #000;
+}
+
+.note,
+.status {
+  color: #777;
+  font-size: 13px;
+  font-style: italic;
+}
+
+.hint {
+  color: #000;
+  font-size: 13px;
+  font-style: italic;
+  line-height: 1.3;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+#panel input[type="file"] {
+  font-family: inherit;
+  font-size: 13px;
+  font-style: italic;
+  max-width: 100%;
+}
+
+#panel input[type="number"] {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 2px 4px;
+  border: 1px solid #000;
+  background: #fff;
+}
+
+#panel button {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 4px 10px;
+  border: 1px solid #000;
+  background: transparent;
+  cursor: pointer;
+}
+#panel button:hover {
+  background: #000;
+  color: #fff;
+}
+
+#panel button.active {
+  background: #000;
+  color: #fff;
+}
+
+.tagRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+}
+.tagChip {
+  font-family: inherit;
+  font-size: 12px;
+  padding: 3px 10px;
+  border: 1px solid #000;
+  border-radius: 12px;
+  background: transparent;
+  cursor: pointer;
+}
+.tagChip:hover {
+  background: #000;
+  color: #fff;
+}
+.tagChip.active {
+  background: #000;
+  color: #fff;
+}
+
+/* styled dialog, replacing the native prompt() */
+
+#modalBackdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+}
+
+#modalBox {
+  width: 320px;
+  max-width: calc(100vw - 48px);
+  background: #fff;
+  border: 0px solid #000;
+  border-radius: 6px;
+  padding: 18px;
+  box-sizing: border-box;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+#modalLabel {
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: #000;
+}
+
+#modalInput {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 14px;
+  padding: 6px 8px;
+  border: 1px solid #000;
+  background: #fff;
+  margin-bottom: 10px;
+}
+
+#modalSuggestions {
+  margin-bottom: 14px;
+}
+
+#modalButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+#modalButtons button {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 4px 12px;
+  border: 0px solid #000;
+  background: transparent;
+  cursor: pointer;
+}
+#modalButtons button:hover {
+  text-decoration: underline;
+}
+
+/* Modern browsers (Chrome, Safari, Edge, Firefox) */
+input[type="file"]::file-selector-button {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 13px;
+  font-weight: normal;
+}
+
+/* Fallback for older WebKit browsers (older Chrome, Safari, Opera) */
+input[type="file"]::-webkit-file-upload-button {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 13px;
+  font-weight: normal;
+}
