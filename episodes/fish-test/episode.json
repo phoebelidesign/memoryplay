@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "title": "fish test",
+  "layout": {
+    "file": "1.mp4",
+    "kind": "video"
+  },
+  "settings": {
+    "blockSize": 15,
+    "threshold": 128,
+    "invert": true,
+    "shuffleSeed": 1
+  },
+  "media": [
+    {
+      "file": "1.mp4",
+      "kind": "video",
+      "tags": []
+    },
+    {
+      "file": "7.mp4",
+      "kind": "video",
+      "tags": []
+    },
+    {
+      "file": "9.mp4",
+      "kind": "video",
+      "tags": []
+    },
+    {
+      "file": "1.mp4",
+      "kind": "video",
+      "tags": []
+    },
+    {
+      "file": "7.mp4",
+      "kind": "video",
+      "tags": []
+    },
+    {
+      "file": "10.mp4",
+      "kind": "video",
+      "tags": []
+    },
+    {
+      "file": "11.mp4",
+      "kind": "video",
+      "tags": []
+    }
+  ],
+  "music": null
+}
