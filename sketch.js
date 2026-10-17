@@ -9,6 +9,7 @@ let layoutImg = null;
 let layoutVid = null;
 let layoutW = 0, layoutH = 0;
 let layoutReady = false;
+let layoutFile = null;       // { name, size } of the uploaded layout, for exporting
 
 let media = [];              // { kind:'image'|'video', img, el, w, h }
 let mask = null;             // Uint8Array, one flag per grid cell
@@ -32,6 +33,7 @@ let dragging = false, dragX = 0, dragY = 0;
 let layoutVideoPlaying = true;  // spacebar toggles this, for a video "think of a memory" layout
 
 let musicEl = null;          // uploaded audio track, if any
+let musicFile = null;        // { name, size } of that track, for exporting
 let soundOn = false;         // whether video sound + music are playing
 let musicVolume = 0.85;      // the one thing that stays clear at any zoom
 let volFactor = null;        // per-media volume, recomputed on every draw
@@ -46,6 +48,20 @@ let modalResolve = null;
 
 const BG = 255;
 
+// Three ways the page runs:
+//   index.html          the maker: upload files and build a collage.
+//   index.html#rabbit   the viewer: opens the episode in episodes/rabbit/.
+//   index.html?author   the maker, plus an Export episode button for preparing
+//                       showcase episodes (see exportEpisode).
+const EPISODE_SLUG = location.hash.slice(1);
+const VIEWER_MODE = EPISODE_SLUG !== '';
+const AUTHOR_MODE = !VIEWER_MODE && new URLSearchParams(location.search).has('author');
+const EPISODES_DIR = 'episodes';
+
+let viewerMessage = '';      // drawn on the canvas, in place of the poem, while an episode loads
+let exportPreviewMask = null;
+let previewToken = 0;
+
 // ---------------------------------------------------------------- setup
 
 function setup() {
@@ -55,6 +71,7 @@ function setup() {
   buildOverlay();
   noLoop();
   redraw();
+  if (VIEWER_MODE) { document.body.classList.add('viewer'); startViewer(); }
 }
 
 function windowResized() {
@@ -74,25 +91,30 @@ function buildOverlay() {
   const panel = createDiv().id('panel').parent('shell');
   ui.panel = panel;
 
-  const makeRow = (labelText) => {
-    const row = createDiv().class('row').parent(panel);
+  // The episode's title, shown in viewer mode.
+  ui.episodeTitle = createDiv('').class('episodeTitle').parent(panel);
+  ui.episodeTitle.style('display', 'none');
+
+  // Rows marked editOnly are hidden in viewer mode (see style.css).
+  const makeRow = (labelText, editOnly) => {
+    const row = createDiv().class(editOnly ? 'row editOnly' : 'row').parent(panel);
     if (labelText) createSpan(labelText).class('label').parent(row);
     return row;
   };
 
-  let r = makeRow('Think of a memory');
+  let r = makeRow('Think of a memory', true);
   ui.layout = createFileInput(handleLayoutFile).parent(r);
   ui.layout.elt.setAttribute('accept', 'image/*,video/*');
 
-  r = makeRow('Piece together everything it is made up of');
+  r = makeRow('Piece together everything it is made up of', true);
   ui.mediaIn = createFileInput(handleMediaFile, true).parent(r);
   ui.mediaIn.elt.setAttribute('accept', 'image/*,video/*');
 
-  r = makeRow('Pick a tune (if desired)');
+  r = makeRow('Pick a tune (if desired)', true);
   ui.audioIn = createFileInput(handleAudioFile).parent(r);
   ui.audioIn.elt.setAttribute('accept', 'audio/*');
 
-  r = makeRow('Block size');
+  r = makeRow('Block size', true);
   ui.block = createInput(String(blockSize), 'number').parent(r);
   ui.block.size(60);
   ui.block.input(() => {
@@ -101,11 +123,11 @@ function buildOverlay() {
   });
   ui.blockNote = createSpan('').class('note').parent(r);
 
-  r = makeRow('Darkness');
+  r = makeRow('Darkness', true);
   ui.thresh = createSlider(0, 255, threshold).parent(r);
   ui.thresh.input(() => { threshold = ui.thresh.value(); refreshMask(); redraw(); });
 
-  r = makeRow('');
+  r = makeRow('', true);
   ui.invertBtn = createButton('Invert').parent(r);
   ui.invertBtn.mousePressed(toggleInvert);
 
@@ -113,7 +135,16 @@ function buildOverlay() {
   ui.tagsContainer = createDiv().class('tagRow').parent(r);
   rebuildTagChips();
 
-  createDiv('Scroll to zoom, drag to move. Press spacebar to play/pause, S to shuffle, 0 to reset view, D to download a large image. Double-click a pixel to tag it.')
+  // Author mode only; appears once a layout is loaded (see refreshExportButton).
+  r = makeRow('', true);
+  ui.exportRow = r;
+  ui.exportBtn = createButton('Export episode').parent(r);
+  // A native click listener rather than mousePressed: the dialog focuses its
+  // text field, and a mousedown handler would have that focus taken straight back.
+  ui.exportBtn.elt.addEventListener('click', exportEpisode);
+  r.style('display', 'none');
+
+  createDiv('Scroll to zoom, drag to move. Press spacebar to play/pause, S to shuffle, 0 to reset view, D to download a large image.' + (VIEWER_MODE ? '' : ' Double-click a pixel to tag it.'))
     .class('hint').parent(panel);
 
   ui.status = createDiv('').class('status').parent(panel);
@@ -130,6 +161,8 @@ function buildOverlay() {
 function buildModal() {
   const backdrop = createDiv().id('modalBackdrop').parent('shell');
   const box = createDiv().id('modalBox').parent(backdrop);
+  ui.modalPreview = createDiv().id('modalPreview').parent(box);
+  ui.modalPreview.style('display', 'none');
   ui.modalLabel = createDiv('').id('modalLabel').parent(box);
   ui.modalInput = createInput('').parent(box);
   ui.modalInput.id('modalInput');
@@ -155,17 +188,33 @@ function buildModal() {
 // prompt(), so call sites just read differently (await instead of a direct call).
 // `suggestions`, if given, renders as clickable chips under the input that
 // toggle themselves in or out of the comma-separated value.
-function showInputModal(label, initial, suggestions) {
+// `options.preview`, if given, is a function handed a fresh canvas to draw into
+// above the input; `options.placeholder` is the input's hint text.
+function showInputModal(label, initial, suggestions, options) {
+  options = options || {};
   return new Promise((resolve) => {
     modalOpen = true;
     modalResolve = resolve;
     ui.modalLabel.html(label);
     ui.modalInput.value(initial || '');
+    ui.modalInput.attribute('placeholder', options.placeholder || '');
+    ui.modalBackdrop.style('display', 'flex');  // first, so the preview can measure its space
+    renderModalPreview(options.preview);
     renderModalSuggestions(suggestions || []);
-    ui.modalBackdrop.style('display', 'flex');
     ui.modalInput.elt.focus();
     ui.modalInput.elt.select();
   });
+}
+
+// A fresh canvas each time the dialog opens, so a slow preview from an earlier
+// opening can never paint over a later one. Hidden when there's nothing to draw.
+function renderModalPreview(drawPreview) {
+  ui.modalPreview.html('');
+  if (!drawPreview) { ui.modalPreview.style('display', 'none'); return; }
+  ui.modalPreview.style('display', 'flex');
+  const canvas = document.createElement('canvas');
+  ui.modalPreview.elt.appendChild(canvas);
+  drawPreview(canvas);
 }
 
 function parseTagList(str) { return str.split(',').map((t) => t.trim()).filter(Boolean); }
@@ -265,6 +314,11 @@ function togglePanel() {
 
 function setStatus(msg) { if (ui.status) ui.status.html(msg); }
 
+// For text that may contain a visitor's own words or a file name.
+function setStatusText(msg) { if (ui.status) ui.status.elt.textContent = msg; }
+
+function fileInfo(file) { return { name: file.name || '', size: file.size || 0 }; }
+
 // Native `loop` restarts by jumping to the very end and back, which in some
 // browsers shows a black frame for an instant. Seeking back slightly before
 // the end avoids that stop/restart edge entirely.
@@ -322,6 +376,7 @@ function applySoundState() {
 
 function handleAudioFile(file) {
   if (file.type !== 'audio') { setStatus('That needs to be an audio file.'); return; }
+  musicFile = fileInfo(file);
   if (musicEl) musicEl.remove();
   const el = createAudio([srcFor(file)]);
   el.hide();
@@ -339,6 +394,7 @@ function handleLayoutFile(file) {
     loadImage(srcFor(file), (img) => {
       layoutKind = 'image';
       layoutImg = img;
+      layoutFile = fileInfo(file);
       if (layoutVid) { layoutVid.remove(); layoutVid = null; }
       layoutW = img.width; layoutH = img.height;
       blockSize = detectBlockSize(img);
@@ -362,6 +418,7 @@ function handleLayoutFile(file) {
       layoutKind = 'video';
       layoutImg = null;
       layoutVid = el;
+      layoutFile = fileInfo(file);
       layoutW = el.elt.videoWidth;
       layoutH = el.elt.videoHeight;
       // Video frames aren't pre-pixelated, so there's no real grid to detect —
@@ -384,7 +441,7 @@ function handleLayoutFile(file) {
 function handleMediaFile(file) {
   if (file.type === 'image') {
     loadImage(srcFor(file), (img) => {
-      media.push({ kind: 'image', img, w: img.width, h: img.height, tags: [] });
+      media.push({ kind: 'image', img, w: img.width, h: img.height, tags: [], ...fileInfo(file) });
       onMediaChanged();
     });
 
@@ -395,7 +452,7 @@ function handleMediaFile(file) {
     attachSmoothLoop(el.elt);
     el.elt.playsInline = true;
     el.elt.preload = 'auto';
-    const entry = { kind: 'video', el, w: 0, h: 0, frameCanvas: null, frameCtx: null, tags: [] };
+    const entry = { kind: 'video', el, w: 0, h: 0, frameCanvas: null, frameCtx: null, tags: [], ...fileInfo(file) };
     el.elt.addEventListener('loadedmetadata', () => {
       entry.w = el.elt.videoWidth;
       entry.h = el.elt.videoHeight;
@@ -487,6 +544,7 @@ function setupGrid() {
   buildAssignment();
   refreshMask();
   fitViewToGrid();
+  refreshExportButton();
   setStatus(`${cols} &times; ${rows} grid, ${activeCount} cells to fill.`);
 }
 
@@ -671,7 +729,7 @@ function itemMatchesFilter(item) {
 // Double-click a pixel to tag the item it's showing — with anything: a name,
 // a place, a time, a vibe. Comma-separated, replaces whatever was there.
 async function doubleClicked() {
-  if (modalOpen || overlayHit()) return;
+  if (VIEWER_MODE || modalOpen || overlayHit()) return;
   const item = itemAtCell(screenToCell(mouseX, mouseY));
   if (!item) return;
   const current = item.tags.join(', ');
@@ -714,7 +772,7 @@ function draw() {
     textFont('Times New Roman');
     textSize(16);
     textLeading(36);
-    text('Memory as\nmountaintop\nspiral staircase\nbreeze\nrabbit\nwindchimes\ncheese knife\nwarmth\nnail clippers\nmandarin peel\ntrain window\nsnail trail\naccident\nsea urchin\nsisters\nupstairs\nthe brink of\n...', width / 2, height / 2);
+    text(VIEWER_MODE ? viewerMessage : 'Memory as\nmountaintop\nspiral staircase\nbreeze\nrabbit\nwindchimes\ncheese knife\nwarmth\nnail clippers\nmandarin peel\ntrain window\nsnail trail\naccident\nsea urchin\nsisters\nupstairs\nthe brink of\n...', width / 2, height / 2);
     return;
   }
 
@@ -852,6 +910,385 @@ function exportHiRes(targetCell = 96) {
   setStatus(`Saved at ${w} &times; ${h}.`);
 }
 
+// ---------------------------------------------------------------- exporting
+// Author mode only (index.html?author). Turns what's on screen into the two
+// files a showcase episode needs: episode.json, which records how it was made,
+// and thumb.png, the black-and-white pixel preview for the gallery. The small
+// files themselves aren't re-saved: copy the originals you uploaded into the
+// episode's files/ folder, under their own names.
+
+function refreshExportButton() {
+  if (!ui.exportRow) return;
+  ui.exportRow.style('display', AUTHOR_MODE && layoutReady ? 'flex' : 'none');
+}
+
+async function exportEpisode() {
+  if (!layoutReady || modalOpen) return;
+
+  if (media.length === 0) {
+    setStatusText('Add the small files first; an episode needs something to be made of.');
+    return;
+  }
+  const problem = exportProblem();
+  if (problem) { setStatusText(problem); return; }
+
+  const input = await showInputModal('Name this episode', '', null, {
+    preview: drawExportPreview,
+    placeholder: 'Episode name',
+  });
+  if (input === null) return;
+
+  const title = input.trim() || 'Untitled episode';
+  const slug = slugify(title);
+
+  const manifest = buildManifest(title);
+  downloadBlob(new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' }), 'episode.json');
+
+  const thumb = await makeThumbnail(exportPreviewMask || mask.slice());
+  if (thumb) setTimeout(() => downloadBlob(thumb, 'thumb.png'), 400);  // spaced so browsers see two downloads
+
+  setStatusText(`Exported "${title}". Make the folder ${EPISODES_DIR}/${slug}/, put episode.json and thumb.png in it, and your original files in a files/ folder inside it.`);
+}
+
+// The manifest lists the small files in their current order. That order, the
+// shuffle seed and the block size are what reproduce this exact arrangement.
+function buildManifest(title) {
+  return {
+    version: 1,
+    title,
+    layout: { file: layoutFile.name, kind: layoutKind },
+    settings: { blockSize, threshold, invert, shuffleSeed },
+    media: media.map((m) => ({ file: m.name, kind: m.kind, tags: m.tags || [] })),
+    music: musicFile ? musicFile.name : null,
+  };
+}
+
+// Every file goes in one files/ folder by name, so two different files sharing
+// a name would overwrite each other. The same file used twice is fine.
+function exportProblem() {
+  const seen = new Map();
+  for (const f of [layoutFile, ...media, musicFile]) {
+    if (!f) continue;
+    if (!f.name) return "One of the files has no name, so it can't be exported. Try uploading it again.";
+    if (seen.has(f.name) && seen.get(f.name) !== f.size) {
+      return `Two different files are both called ${f.name}. Rename one and upload it again.`;
+    }
+    seen.set(f.name, f.size);
+  }
+  return '';
+}
+
+function slugify(text) {
+  const slug = text
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return slug || 'episode';
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function makeThumbnail(maskArr) {
+  const canvas = document.createElement('canvas');
+  paintMaskPreview(canvas, maskArr, { maxW: 480, maxH: 360, dpr: 1 });
+  return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+}
+
+// The episode with the small files stripped out: just the pixelated main image,
+// black where pieces would go. A video layout gets a random frame instead.
+function drawExportPreview(canvas) {
+  const token = ++previewToken;
+  if (layoutKind !== 'video' || !layoutVid) {
+    exportPreviewMask = mask.slice();
+    paintMaskPreview(canvas, exportPreviewMask);
+    return;
+  }
+  exportPreviewMask = null;
+  paintMaskPreview(canvas, null);  // blank at the right size until the frame arrives
+  grabRandomFrameMask((frameMask) => {
+    if (token !== previewToken) return;  // a newer dialog has opened since
+    exportPreviewMask = frameMask || mask.slice();
+    paintMaskPreview(canvas, exportPreviewMask);
+  });
+}
+
+function paintMaskPreview(canvas, maskArr, opts) {
+  opts = opts || {};
+  const maxW = opts.maxW || (canvas.parentElement && canvas.parentElement.clientWidth) || 284;
+  const maxH = opts.maxH || 200;
+  const dpr = opts.dpr || window.devicePixelRatio || 1;
+  const cs = Math.min(maxW / cols, maxH / rows);
+  const w = Math.round(cols * cs), h = Math.round(rows * cs);
+
+  canvas.width = Math.round(w * dpr);   // setting width also resets the transform
+  canvas.height = Math.round(h * dpr);
+  canvas.style.width = w + 'px';
+  canvas.style.height = h + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, w, h);
+  if (!maskArr) return;
+
+  ctx.fillStyle = '#000';
+  for (let r = 0; r < rows; r++) {
+    // Round the edges rather than the size, so neighbours never leave seams.
+    const y0 = Math.round((r * h) / rows), y1 = Math.round(((r + 1) * h) / rows);
+    for (let c = 0; c < cols; c++) {
+      if (!maskArr[c + r * cols]) continue;
+      const x0 = Math.round((c * w) / cols), x1 = Math.round(((c + 1) * w) / cols);
+      ctx.fillRect(x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0));
+    }
+  }
+}
+
+// ---------------------------------------------------------------- viewer
+// index.html#rabbit opens episodes/rabbit/. There, episode.json says how it was
+// made and files/ holds the originals. Everything is rebuilt from those: same
+// settings, same file order, same shuffle seed, so it matches what the author built.
+
+window.addEventListener('hashchange', () => location.reload());
+
+class EpisodeError extends Error {}
+
+function showViewerMessage(msg) {
+  viewerMessage = msg;
+  redraw();
+}
+
+async function startViewer() {
+  // The slug goes into a URL, so only plain names are accepted.
+  if (!/^[a-z0-9][a-z0-9_-]*$/i.test(EPISODE_SLUG)) {
+    showViewerMessage("This episode isn't available.");
+    return;
+  }
+  const dir = `${EPISODES_DIR}/${EPISODE_SLUG}`;
+
+  try {
+    showViewerMessage('Loading…');
+    const res = await fetch(`${dir}/episode.json`);
+    if (!res.ok) throw new EpisodeError("This episode isn't available.");
+    const manifest = validateManifest(await res.json());
+    await loadEpisode(manifest, dir);
+  } catch (err) {
+    console.error(err);
+    showViewerMessage(err instanceof EpisodeError ? err.message : "This episode isn't available.");
+  }
+}
+
+function validateManifest(m) {
+  const bad = (why) => new EpisodeError(`This episode's episode.json isn't valid (${why}).`);
+  const kinds = ['image', 'video'];
+
+  if (!m || typeof m !== 'object') throw bad('not an object');
+  if (m.version !== 1) throw bad('unknown version');
+  if (!m.layout || typeof m.layout.file !== 'string' || !m.layout.file || !kinds.includes(m.layout.kind)) throw bad('layout');
+
+  const s = m.settings;
+  if (!s || !Number.isInteger(s.blockSize) || s.blockSize < 1 || !Number.isFinite(s.threshold)
+      || typeof s.invert !== 'boolean' || !Number.isFinite(s.shuffleSeed)) throw bad('settings');
+
+  if (!Array.isArray(m.media)) throw bad('media');
+  for (const item of m.media) {
+    if (!item || typeof item.file !== 'string' || !item.file || !kinds.includes(item.kind)) throw bad('a media entry');
+  }
+  if (m.music != null && typeof m.music !== 'string') throw bad('music');
+
+  return {
+    title: typeof m.title === 'string' && m.title.trim() ? m.title.trim() : 'Untitled episode',
+    layout: m.layout,
+    settings: s,
+    media: m.media.map((item) => ({
+      file: item.file,
+      kind: item.kind,
+      tags: Array.isArray(item.tags) ? item.tags.filter((t) => typeof t === 'string') : [],
+    })),
+    music: m.music || null,
+  };
+}
+
+async function loadEpisode(manifest, dir) {
+  const fileUrl = (name) => `${dir}/files/${encodeURIComponent(name)}`;
+  const total = manifest.media.length + 1;
+  let done = 0;
+  const tick = () => { done++; showViewerMessage(`Loading… ${done} of ${total}`); };
+
+  // Files load in parallel but are assembled in the manifest's order, since
+  // that order is part of what reproduces the author's arrangement.
+  const entries = await Promise.all(manifest.media.map(async (item) => {
+    const entry = item.kind === 'video'
+      ? await loadVideoEntry(fileUrl(item.file), item.file)
+      : await loadImageEntry(fileUrl(item.file), item.file);
+    entry.tags = item.tags;
+    tick();
+    return entry;
+  }));
+  media = entries;
+
+  await loadLayoutFromManifest(manifest, fileUrl(manifest.layout.file));
+  tick();
+
+  if (manifest.music) {
+    const el = createAudio([fileUrl(manifest.music)]);
+    el.hide();
+    el.elt.loop = true;
+    el.elt.volume = musicVolume;
+    musicEl = el;   // starts when the visitor turns sound on
+  }
+
+  rebuildTagChips();
+  ui.episodeTitle.elt.textContent = manifest.title;
+  ui.episodeTitle.style('display', 'block');
+  document.title = `${manifest.title} — Memory play`;
+  setStatus('');
+  viewerMessage = '';
+
+  if (layoutKind === 'video' || hasPlayingVideo()) loop();
+  else redraw();
+}
+
+function loadImageEntry(url, name) {
+  return new Promise((resolve, reject) => {
+    loadImage(
+      url,
+      (img) => resolve({ kind: 'image', img, w: img.width, h: img.height, tags: [], name, size: 0 }),
+      () => reject(new EpisodeError(`Couldn't load ${name}.`))
+    );
+  });
+}
+
+// A missing file fires `error` on the <source> p5 puts inside the video, not on
+// the video itself, so both are listened to.
+function onVideoError(el, handler) {
+  el.elt.addEventListener('error', handler, { once: true });
+  el.elt.querySelectorAll('source').forEach((src) => src.addEventListener('error', handler, { once: true }));
+}
+
+function loadVideoEntry(url, name) {
+  return new Promise((resolve, reject) => {
+    const el = createVideo([url]);
+    el.hide();
+    el.elt.muted = !soundOn;
+    attachSmoothLoop(el.elt);
+    el.elt.playsInline = true;
+    el.elt.preload = 'auto';
+    const entry = { kind: 'video', el, w: 0, h: 0, frameCanvas: null, frameCtx: null, tags: [], name, size: 0 };
+    el.elt.addEventListener('loadedmetadata', () => {
+      entry.w = el.elt.videoWidth;
+      entry.h = el.elt.videoHeight;
+      el.elt.play().catch(() => {});
+      resolve(entry);
+    }, { once: true });
+    onVideoError(el, () => reject(new EpisodeError(`Couldn't load ${name}.`)));
+  });
+}
+
+// Like handleLayoutFile, but the settings come from the manifest rather than
+// being detected, so the grid is exactly the one the author saw.
+function loadLayoutFromManifest(manifest, url) {
+  return new Promise((resolve, reject) => {
+    const name = manifest.layout.file;
+    const bad = () => reject(new EpisodeError(`Couldn't load ${name}.`));
+    const s = manifest.settings;
+    const applySettings = () => {
+      blockSize = s.blockSize;
+      threshold = s.threshold;
+      invert = s.invert;
+      shuffleSeed = s.shuffleSeed;
+    };
+
+    if (manifest.layout.kind === 'image') {
+      loadImage(url, (img) => {
+        layoutKind = 'image';
+        layoutImg = img;
+        layoutW = img.width; layoutH = img.height;
+        applySettings();
+        layoutReady = true;
+        setupGrid();
+        resolve();
+      }, bad);
+    } else {
+      const el = createVideo([url]);
+      el.hide();
+      el.elt.muted = !soundOn;
+      attachSmoothLoop(el.elt);
+      el.elt.playsInline = true;
+      el.elt.addEventListener('loadedmetadata', () => {
+        layoutKind = 'video';
+        layoutImg = null;
+        layoutVid = el;
+        layoutW = el.elt.videoWidth; layoutH = el.elt.videoHeight;
+        applySettings();
+        layoutReady = true;
+        setupGrid();
+        el.elt.play().catch(() => {});
+        resolve();
+      }, { once: true });
+      onVideoError(el, bad);
+    }
+  });
+}
+
+
+// Reads one random frame of the layout video from a throwaway copy of it, so
+// the video on screen keeps playing undisturbed. Calls done(mask), or
+// done(null) if the frame can't be read, in which case the caller falls back.
+function grabRandomFrameMask(done) {
+  const src = layoutVid.elt.currentSrc;
+  if (!src) { done(null); return; }
+
+  const v = document.createElement('video');
+  let finished = false;
+  const finish = (result) => {
+    if (finished) return;
+    finished = true;
+    v.removeAttribute('src');
+    v.load();               // release the decoder
+    done(result);
+  };
+
+  v.muted = true;
+  v.playsInline = true;
+  v.preload = 'auto';
+  v.addEventListener('loadedmetadata', () => {
+    v.currentTime = Math.random() * Math.max(0, v.duration - 0.25);
+  }, { once: true });
+  v.addEventListener('seeked', () => finish(maskFromFrame(v)), { once: true });
+  v.addEventListener('error', () => finish(null), { once: true });
+  setTimeout(() => finish(null), 3000);  // never leave the preview blank
+  v.src = src;
+}
+
+// The same thresholding as sampleMaskFromVideo(), for any frame source.
+function maskFromFrame(frameSrc) {
+  const buf = document.createElement('canvas');
+  buf.width = cols;
+  buf.height = rows;
+  const ctx = buf.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(frameSrc, 0, 0, cols, rows);
+  const px = ctx.getImageData(0, 0, cols, rows).data;
+
+  const out = new Uint8Array(cols * rows);
+  for (let i = 0; i < cols * rows; i++) {
+    const k = i * 4;
+    const lum = 0.299 * px[k] + 0.587 * px[k + 1] + 0.114 * px[k + 2];
+    out[i] = (lum < threshold) !== invert ? 1 : 0;
+  }
+  return out;
+}
+
 // ---------------------------------------------------------------- keys
 
 function keyPressed() {
@@ -859,6 +1296,6 @@ function keyPressed() {
   if (key === ' ') { toggleLayoutVideo(); return false; }
   else if (key === 'd' || key === 'D') { exportHiRes(); return false; }
   else if (key === 's' || key === 'S') reshuffle();
-  else if (key === 'i' || key === 'I') toggleInvert();
+  else if ((key === 'i' || key === 'I') && !VIEWER_MODE) toggleInvert();
   else if (key === '0') resetView();
 }

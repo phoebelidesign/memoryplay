@@ -111,6 +111,16 @@ html, body {
   margin-bottom: 15px;
 }
 
+/* viewer mode: the episode is fixed, so the controls that would change it go away */
+body.viewer .editOnly {
+  display: none;
+}
+
+.episodeTitle {
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
 #panel input[type="file"] {
   font-family: inherit;
   font-size: 13px;
@@ -189,6 +199,16 @@ html, body {
   padding: 18px;
   box-sizing: border-box;
   font-family: 'Times New Roman', Times, serif;
+}
+
+#modalPreview {
+  display: none;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+#modalPreview canvas {
+  display: block;
+  border: 1px solid #ddd;
 }
 
 #modalLabel {
