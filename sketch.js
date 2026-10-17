@@ -59,7 +59,7 @@ const AUTHOR_MODE = !VIEWER_MODE && new URLSearchParams(location.search).has('au
 const EPISODES_DIR = 'episodes';
 
 let viewerMessage = '';      // drawn on the canvas, in place of the poem, while an episode loads
-let exportPreviewMask = null;
+let episodePreviewMask = null;
 let previewToken = 0;
 
 // ---------------------------------------------------------------- setup
@@ -132,16 +132,21 @@ function buildOverlay() {
   ui.invertBtn.mousePressed(toggleInvert);
 
   r = makeRow('Filter by tag');
+  ui.tagFilterRow = r;
   ui.tagsContainer = createDiv().class('tagRow').parent(r);
   rebuildTagChips();
 
-  // Author mode only; appears once a layout is loaded (see refreshExportButton).
+  // Appears once a layout is loaded (see refreshSaveRow). Save is a placeholder
+  // for everyone; Export is for preparing showcase episodes, in author mode only.
   r = makeRow('', true);
-  ui.exportRow = r;
+  ui.saveRow = r;
+  ui.saveBtn = createButton('Save episode').parent(r);
   ui.exportBtn = createButton('Export episode').parent(r);
-  // A native click listener rather than mousePressed: the dialog focuses its
+  // Native click listeners rather than mousePressed: the dialog focuses its
   // text field, and a mousedown handler would have that focus taken straight back.
+  ui.saveBtn.elt.addEventListener('click', saveEpisode);
   ui.exportBtn.elt.addEventListener('click', exportEpisode);
+  if (!AUTHOR_MODE) ui.exportBtn.style('display', 'none');
   r.style('display', 'none');
 
   createDiv('Scroll to zoom, drag to move. Press spacebar to play/pause, S to shuffle, 0 to reset view, D to download a large image.' + (VIEWER_MODE ? '' : ' Double-click a pixel to tag it.'))
@@ -544,7 +549,7 @@ function setupGrid() {
   buildAssignment();
   refreshMask();
   fitViewToGrid();
-  refreshExportButton();
+  refreshSaveRow();
   setStatus(`${cols} &times; ${rows} grid, ${activeCount} cells to fill.`);
 }
 
@@ -910,16 +915,31 @@ function exportHiRes(targetCell = 96) {
   setStatus(`Saved at ${w} &times; ${h}.`);
 }
 
-// ---------------------------------------------------------------- exporting
-// Author mode only (index.html?author). Turns what's on screen into the two
-// files a showcase episode needs: episode.json, which records how it was made,
-// and thumb.png, the black-and-white pixel preview for the gallery. The small
-// files themselves aren't re-saved: copy the originals you uploaded into the
-// episode's files/ folder, under their own names.
+// ---------------------------------------------------------------- saving + exporting
+// Save is a placeholder: it shows the name-and-preview dialog, but nothing is
+// stored anywhere. Export (author mode only, index.html?author) turns what's on
+// screen into the two files a showcase episode needs: episode.json, which
+// records how it was made, and thumb.png, the black-and-white pixel preview for
+// the gallery. The small files themselves aren't re-saved: copy the originals
+// you uploaded into the episode's files/ folder, under their own names.
 
-function refreshExportButton() {
-  if (!ui.exportRow) return;
-  ui.exportRow.style('display', AUTHOR_MODE && layoutReady ? 'flex' : 'none');
+function refreshSaveRow() {
+  if (!ui.saveRow) return;
+  ui.saveRow.style('display', layoutReady && !VIEWER_MODE ? 'flex' : 'none');
+}
+
+async function saveEpisode() {
+  if (!layoutReady || modalOpen) return;
+
+  const input = await showInputModal('Name this episode', '', null, {
+    preview: drawEpisodePreview,
+    placeholder: 'Episode name',
+  });
+  if (input === null) return;
+
+  const title = input.trim() || 'Untitled episode';
+  // TODO: this is where an upload would go, if saving is ever connected.
+  setStatusText(`Saving isn't connected yet, so "${title}" wasn't stored.`);
 }
 
 async function exportEpisode() {
@@ -933,7 +953,7 @@ async function exportEpisode() {
   if (problem) { setStatusText(problem); return; }
 
   const input = await showInputModal('Name this episode', '', null, {
-    preview: drawExportPreview,
+    preview: drawEpisodePreview,
     placeholder: 'Episode name',
   });
   if (input === null) return;
@@ -944,7 +964,7 @@ async function exportEpisode() {
   const manifest = buildManifest(title);
   downloadBlob(new Blob([JSON.stringify(manifest, null, 2)], { type: 'application/json' }), 'episode.json');
 
-  const thumb = await makeThumbnail(exportPreviewMask || mask.slice());
+  const thumb = await makeThumbnail(episodePreviewMask || mask.slice());
   if (thumb) setTimeout(() => downloadBlob(thumb, 'thumb.png'), 400);  // spaced so browsers see two downloads
 
   setStatusText(`Exported "${title}". Make the folder ${EPISODES_DIR}/${slug}/, put episode.json and thumb.png in it, and your original files in a files/ folder inside it.`);
@@ -1007,19 +1027,19 @@ function makeThumbnail(maskArr) {
 
 // The episode with the small files stripped out: just the pixelated main image,
 // black where pieces would go. A video layout gets a random frame instead.
-function drawExportPreview(canvas) {
+function drawEpisodePreview(canvas) {
   const token = ++previewToken;
   if (layoutKind !== 'video' || !layoutVid) {
-    exportPreviewMask = mask.slice();
-    paintMaskPreview(canvas, exportPreviewMask);
+    episodePreviewMask = mask.slice();
+    paintMaskPreview(canvas, episodePreviewMask);
     return;
   }
-  exportPreviewMask = null;
+  episodePreviewMask = null;
   paintMaskPreview(canvas, null);  // blank at the right size until the frame arrives
   grabRandomFrameMask((frameMask) => {
     if (token !== previewToken) return;  // a newer dialog has opened since
-    exportPreviewMask = frameMask || mask.slice();
-    paintMaskPreview(canvas, exportPreviewMask);
+    episodePreviewMask = frameMask || mask.slice();
+    paintMaskPreview(canvas, episodePreviewMask);
   });
 }
 
@@ -1149,6 +1169,8 @@ async function loadEpisode(manifest, dir) {
   }
 
   rebuildTagChips();
+  // Nothing to filter by if the episode was made without tags.
+  if (!media.some((m) => m.tags.length > 0)) ui.tagFilterRow.style('display', 'none');
   ui.episodeTitle.elt.textContent = manifest.title;
   ui.episodeTitle.style('display', 'block');
   document.title = `${manifest.title} — Memory play`;
