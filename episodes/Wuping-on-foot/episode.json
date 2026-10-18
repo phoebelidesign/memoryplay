@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "title": "Fujian on foot",
+  "title": "Wuping on foot",
   "layout": {
     "file": "IMG_5101.MOV",
     "kind": "video"
@@ -83,17 +83,23 @@
     {
       "file": "IMG_5139.webp",
       "kind": "image",
-      "tags": []
+      "tags": [
+        "downstream"
+      ]
     },
     {
       "file": "IMG_5141.webp",
       "kind": "image",
-      "tags": []
+      "tags": [
+        "downstream"
+      ]
     },
     {
       "file": "IMG_5155.webp",
       "kind": "image",
-      "tags": []
+      "tags": [
+        "downstream"
+      ]
     },
     {
       "file": "IMG_5108.webp",
@@ -132,7 +138,9 @@
     {
       "file": "IMG_5145.webp",
       "kind": "image",
-      "tags": []
+      "tags": [
+        "downstream"
+      ]
     },
     {
       "file": "IMG_5125.webp",
@@ -149,7 +157,9 @@
     {
       "file": "IMG_5149.webp",
       "kind": "image",
-      "tags": []
+      "tags": [
+        "downstream"
+      ]
     },
     {
       "file": "IMG_5123.webp",
@@ -183,7 +193,9 @@
     {
       "file": "IMG_5148.webp",
       "kind": "image",
-      "tags": []
+      "tags": [
+        "downstream"
+      ]
     },
     {
       "file": "IMG_5112.webp",
@@ -198,7 +210,9 @@
     {
       "file": "IMG_5140.webp",
       "kind": "image",
-      "tags": []
+      "tags": [
+        "downstream"
+      ]
     },
     {
       "file": "IMG_5144.webp",
@@ -222,7 +236,9 @@
     {
       "file": "IMG_5147.webp",
       "kind": "image",
-      "tags": []
+      "tags": [
+        "downstream"
+      ]
     },
     {
       "file": "IMG_5170.webp",
@@ -255,17 +271,23 @@
     {
       "file": "IMG_5146.webp",
       "kind": "image",
-      "tags": []
+      "tags": [
+        "downstream"
+      ]
     },
     {
       "file": "IMG_5150.webp",
       "kind": "image",
-      "tags": []
+      "tags": [
+        "downstream"
+      ]
     },
     {
       "file": "IMG_5151.webp",
       "kind": "image",
-      "tags": []
+      "tags": [
+        "downstream"
+      ]
     },
     {
       "file": "IMG_5164.webp",
