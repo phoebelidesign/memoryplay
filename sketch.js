@@ -366,8 +366,12 @@ function toggleSound() {
   applySoundState();
 }
 
+// With a music track present, it takes over and the main video stays silent.
+// The small pixel videos aren't affected.
+function layoutMuted() { return !soundOn || musicEl !== null; }
+
 function applySoundState() {
-  if (layoutVid) { layoutVid.elt.muted = !soundOn; layoutVid.elt.volume = LAYOUT_VID_VOLUME; }
+  if (layoutVid) { layoutVid.elt.muted = layoutMuted(); layoutVid.elt.volume = LAYOUT_VID_VOLUME; }
   for (const m of media) {
     if (m.kind === 'video' && m.el) m.el.elt.muted = !soundOn;
   }
@@ -388,6 +392,7 @@ function handleAudioFile(file) {
   el.elt.loop = true;
   el.elt.volume = musicVolume;
   musicEl = el;
+  if (layoutVid) layoutVid.elt.muted = layoutMuted();   // the track replaces the main video's sound
   if (soundOn) el.elt.play().catch(() => {});
   setStatus('Music added.');
 }
@@ -416,7 +421,7 @@ function handleLayoutFile(file) {
     if (layoutVid) layoutVid.remove();
     const el = createVideo([srcFor(file)]);
     el.hide();
-    el.elt.muted = !soundOn;      // muted unless sound has been turned on
+    el.elt.muted = layoutMuted();  // muted unless sound is on and there's no music track
     attachSmoothLoop(el.elt);
     el.elt.playsInline = true;
     el.elt.addEventListener('loadedmetadata', () => {
@@ -1166,6 +1171,7 @@ async function loadEpisode(manifest, dir) {
     el.elt.loop = true;
     el.elt.volume = musicVolume;
     musicEl = el;   // starts when the visitor turns sound on
+    if (layoutVid) layoutVid.elt.muted = layoutMuted();
   }
 
   rebuildTagChips();
@@ -1244,7 +1250,7 @@ function loadLayoutFromManifest(manifest, url) {
     } else {
       const el = createVideo([url]);
       el.hide();
-      el.elt.muted = !soundOn;
+      el.elt.muted = layoutMuted();
       attachSmoothLoop(el.elt);
       el.elt.playsInline = true;
       el.elt.addEventListener('loadedmetadata', () => {
