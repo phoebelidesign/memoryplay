@@ -1,0 +1,279 @@
+{
+  "version": 1,
+  "title": "Fujian on foot",
+  "layout": {
+    "file": "IMG_5101.MOV",
+    "kind": "video"
+  },
+  "settings": {
+    "blockSize": 13,
+    "threshold": 215,
+    "invert": true,
+    "shuffleSeed": 1
+  },
+  "media": [
+    {
+      "file": "IMG_5101.MOV",
+      "kind": "video",
+      "tags": [
+        "honk honk",
+        "picking meiwa kumquats"
+      ]
+    },
+    {
+      "file": "IMG_5089.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5090.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5091.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5092.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5093.webp",
+      "kind": "image",
+      "tags": [
+        "we won a mouse at the neighbourhood arcade"
+      ]
+    },
+    {
+      "file": "IMG_5097.webp",
+      "kind": "image",
+      "tags": [
+        "we won a mouse at the neighbourhood arcade"
+      ]
+    },
+    {
+      "file": "IMG_5138.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5130.webp",
+      "kind": "image",
+      "tags": [
+        "we won a mouse at the neighbourhood arcade"
+      ]
+    },
+    {
+      "file": "IMG_5120.webp",
+      "kind": "image",
+      "tags": [
+        "#nails"
+      ]
+    },
+    {
+      "file": "IMG_5121.webp",
+      "kind": "image",
+      "tags": [
+        "#nails"
+      ]
+    },
+    {
+      "file": "IMG_5139.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5141.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5155.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5108.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5114.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5115.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5133.webp",
+      "kind": "image",
+      "tags": [
+        "we won a mouse at the neighbourhood arcade"
+      ]
+    },
+    {
+      "file": "IMG_5168.webp",
+      "kind": "image",
+      "tags": [
+        "grandma rocks microbob and red coat at local park"
+      ]
+    },
+    {
+      "file": "IMG_5107.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5145.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5125.webp",
+      "kind": "image",
+      "tags": [
+        "honk honk"
+      ]
+    },
+    {
+      "file": "IMG_5109.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5149.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5123.webp",
+      "kind": "image",
+      "tags": [
+        "honk honk"
+      ]
+    },
+    {
+      "file": "IMG_5129.webp",
+      "kind": "image",
+      "tags": [
+        "we won a mouse at the neighbourhood arcade",
+        "honk honk"
+      ]
+    },
+    {
+      "file": "IMG_5110.webp",
+      "kind": "image",
+      "tags": [
+        "picking meiwa kumquats"
+      ]
+    },
+    {
+      "file": "IMG_5167.webp",
+      "kind": "image",
+      "tags": [
+        "grandma rocks microbob and red coat at local park"
+      ]
+    },
+    {
+      "file": "IMG_5148.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5112.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5128.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5140.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5144.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5165.webp",
+      "kind": "image",
+      "tags": [
+        "grandma rocks microbob and red coat at local park"
+      ]
+    },
+    {
+      "file": "IMG_5113.webp",
+      "kind": "image",
+      "tags": [
+        "picking meiwa kumquats"
+      ]
+    },
+    {
+      "file": "IMG_5147.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5170.webp",
+      "kind": "image",
+      "tags": [
+        "grandma rocks microbob and red coat at local park"
+      ]
+    },
+    {
+      "file": "IMG_5105.webp",
+      "kind": "image",
+      "tags": [
+        "picking meiwa kumquats"
+      ]
+    },
+    {
+      "file": "IMG_5103.webp",
+      "kind": "image",
+      "tags": [
+        "picking meiwa kumquats"
+      ]
+    },
+    {
+      "file": "IMG_5106.webp",
+      "kind": "image",
+      "tags": [
+        "picking meiwa kumquats"
+      ]
+    },
+    {
+      "file": "IMG_5146.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5150.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5151.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5164.webp",
+      "kind": "image",
+      "tags": [
+        "grandma rocks microbob and red coat at local park"
+      ]
+    }
+  ],
+  "music": null
+}
