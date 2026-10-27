@@ -18,8 +18,26 @@ let activeCount = 0;
 
 let blockSize = 12;          // source pixels per grid cell
 let cols = 0, rows = 0;
-const DEFAULT_BLOCK_MIN = 10, DEFAULT_BLOCK_MAX = 15;
+const DEFAULT_BLOCK_MIN = 7, DEFAULT_BLOCK_MAX = 12;
 function clampDefaultBlock(v) { return constrain(Math.round(v), DEFAULT_BLOCK_MIN, DEFAULT_BLOCK_MAX); }
+
+// A pixelated layout has real blocks of some size (say 37px). Cells of 7-12px
+// keep the grid a sensible size, so pick the whole number in that range whose
+// cells line up best with the image's own blocks: 37px blocks give 12px cells
+// (about three per block), 40px blocks give 10px cells (exactly four). A block
+// size already in range is kept as it is.
+function startingBlockFor(detected) {
+  if (detected >= DEFAULT_BLOCK_MIN && detected <= DEFAULT_BLOCK_MAX) return detected;
+  let best = DEFAULT_BLOCK_MIN, bestMisfit = Infinity;
+  for (let b = DEFAULT_BLOCK_MIN; b <= DEFAULT_BLOCK_MAX; b++) {
+    const ratio = detected > b ? detected / b : b / detected;
+    const misfit = Math.abs(ratio - Math.round(ratio));
+    const middle = (DEFAULT_BLOCK_MIN + DEFAULT_BLOCK_MAX) / 2;
+    const nearer = Math.abs(b - middle) < Math.abs(best - middle);   // on a tie, prefer the middle of the range
+    if (misfit < bestMisfit - 1e-9 || (Math.abs(misfit - bestMisfit) <= 1e-9 && nearer)) { best = b; bestMisfit = misfit; }
+  }
+  return best;
+}
 
 let threshold = 128;         // luminance below this = an active cell
 let invert = false;
@@ -533,7 +551,7 @@ function detectBlockSize(img) {
     }
     if (hits / list.length >= 0.97) best = b;   // keep the largest that explains them
   }
-  return best > 1 ? best : clampDefaultBlock(img.width / 64);
+  return best > 1 ? startingBlockFor(best) : clampDefaultBlock(img.width / 64);
 }
 
 function setupGrid() {
