@@ -1,4 +1,3 @@
-// One thing will remind you of another, and another.
 // A layout image or video becomes a grid filling the whole window; each
 // active cell is filled with a photo or video from your own archive.
 

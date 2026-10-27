@@ -52,7 +52,7 @@ html, body {
 #menuBtn { left: 20px; }
 #soundBtn { right: 20px; font-size: 14px; }
 
-/* hidden controls panel */
+/* controls panel */
 
 #panel {
   position: fixed;
@@ -111,7 +111,7 @@ html, body {
   margin-bottom: 15px;
 }
 
-/* viewer mode: the episode is fixed, so the controls that would change it go away */
+/* display mode */
 body.viewer .editOnly {
   display: none;
 }
@@ -134,6 +134,38 @@ body.viewer .editOnly {
   padding: 2px 4px;
   border: 1px solid #000;
   background: #fff;
+}
+
+#panel input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  height: 16px;
+}
+#panel input[type="range"]::-webkit-slider-runnable-track {
+  height: 1px;
+  background: #000;
+}
+#panel input[type="range"]::-moz-range-track {
+  height: 1px;
+  background: #000;
+}
+#panel input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  margin-top: -5.5px;
+  border-radius: 50%;
+  background: #000;
+  cursor: pointer;
+}
+#panel input[type="range"]::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: none;
+  border-radius: 50%;
+  background: #000;
+  cursor: pointer;
 }
 
 #panel button {
@@ -177,8 +209,6 @@ body.viewer .editOnly {
   background: #000;
   color: #fff;
 }
-
-/* styled dialog, replacing the native prompt() */
 
 #modalBackdrop {
   position: fixed;
@@ -249,14 +279,11 @@ body.viewer .editOnly {
   text-decoration: underline;
 }
 
-/* Modern browsers (Chrome, Safari, Edge, Firefox) */
 input[type="file"]::file-selector-button {
   font-family: 'Times New Roman', Times, serif;
   font-size: 13px;
   font-weight: normal;
 }
-
-/* Fallback for older WebKit browsers (older Chrome, Safari, Opera) */
 input[type="file"]::-webkit-file-upload-button {
   font-family: 'Times New Roman', Times, serif;
   font-size: 13px;
