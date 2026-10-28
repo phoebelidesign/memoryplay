@@ -127,7 +127,7 @@ function buildOverlay() {
   ui.mediaIn = createFileInput(handleMediaFile, true).parent(r);
   ui.mediaIn.elt.setAttribute('accept', 'image/*,video/*');
 
-  r = makeRow('Pick a tune (if desired)', true);
+  r = makeRow('Pick a tune', true);
   ui.audioIn = createFileInput(handleAudioFile).parent(r);
   ui.audioIn.elt.setAttribute('accept', 'audio/*');
 
@@ -799,7 +799,7 @@ function draw() {
     textFont('Times New Roman');
     textSize(16);
     textLeading(36);
-    text(VIEWER_MODE ? viewerMessage : 'Memory as\nmountaintop\nspiral staircase\nbreeze\nrabbit\nwindchimes\ncheese knife\nwarmth\nnail clippers\nmandarin peel\ntrain window\nsnail trail\naccident\nsea urchin\nsisters\nupstairs\nthe brink of\n...', width / 2, height / 2);
+    text(VIEWER_MODE ? viewerMessage : 'Step 1.\nThink of a memory and note what appears immediately in your mind\n(this could be anything:\na mountaintop\na spiral staircase\nwindchimes, a breeze, warmth\nsea urchins, a cheese knife\na mandarin peel, a snail trail\nnail clippers\nsisters)\n...and upload an image/video that represents it.\n\nStep 2.\nPiece together everything else that the memory is made up of, and upload all of these.\n\nStep 3.\nUpload some music, if desired (always a good idea).\n\nStep 4.\nPlay :)', width / 2, height / 2);
     return;
   }
 
