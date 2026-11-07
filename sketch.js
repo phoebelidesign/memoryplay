@@ -1,3 +1,4 @@
+// One thing will remind you of another, and another.
 // A layout image or video becomes a grid filling the whole window; each
 // active cell is filled with a photo or video from your own archive.
 
@@ -65,6 +66,12 @@ let modalResolve = null;
 
 const BG = 255;
 
+// The image shown on the landing screen, before a layout is loaded. It fills the
+// whole screen, cropping its edges if the proportions differ. Put the file next
+// to index.html; if it's missing, the poem is shown instead.
+const LANDING_IMAGE = 'landing.jpg';
+let landingImg = null;
+
 // Three ways the page runs:
 //   index.html          the maker: upload files and build a collage.
 //   index.html#rabbit   the viewer: opens the episode in episodes/rabbit/.
@@ -88,7 +95,12 @@ function setup() {
   buildOverlay();
   noLoop();
   redraw();
-  if (VIEWER_MODE) { document.body.classList.add('viewer'); startViewer(); }
+  if (VIEWER_MODE) {
+    document.body.classList.add('viewer');
+    startViewer();
+  } else {
+    loadImage(LANDING_IMAGE, (img) => { landingImg = img; if (!layoutReady) redraw(); }, () => {});
+  }
 }
 
 function windowResized() {
@@ -789,10 +801,18 @@ function overlayHit() {
 
 // ---------------------------------------------------------------- drawing
 
+// Scales an image to fill the whole canvas, centred, cropping whatever overflows.
+function drawCover(img) {
+  const scale = Math.max(width / img.width, height / img.height);
+  const w = img.width * scale, h = img.height * scale;
+  image(img, (width - w) / 2, (height - h) / 2, w, h);
+}
+
 function draw() {
   background(BG);
 
   if (!layoutReady) {
+    if (landingImg && !VIEWER_MODE) { drawCover(landingImg); return; }
     noStroke();
     fill(40);
     textAlign(CENTER, CENTER);
