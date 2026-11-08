@@ -1,0 +1,295 @@
+{
+  "version": 1,
+  "title": "Berry",
+  "layout": {
+    "file": "IMG_2549.MOV",
+    "kind": "video"
+  },
+  "settings": {
+    "blockSize": 13,
+    "threshold": 158,
+    "invert": true,
+    "shuffleSeed": 1
+  },
+  "media": [
+    {
+      "file": "IMG_2611.mp4",
+      "kind": "video",
+      "tags": [
+        "the earliest evidence of man-made fire"
+      ]
+    },
+    {
+      "file": "IMG_2461.MOV",
+      "kind": "video",
+      "tags": []
+    },
+    {
+      "file": "IMG_2468.MOV",
+      "kind": "video",
+      "tags": [
+        "the earliest evidence of man-made fire"
+      ]
+    },
+    {
+      "file": "IMG_2484.MOV",
+      "kind": "video",
+      "tags": []
+    },
+    {
+      "file": "IMG_2517.MOV",
+      "kind": "video",
+      "tags": [
+        "DOGS"
+      ]
+    },
+    {
+      "file": "IMG_2549.MOV",
+      "kind": "video",
+      "tags": [
+        "the earliest evidence of man-made fire"
+      ]
+    },
+    {
+      "file": "IMG_2580.MOV",
+      "kind": "video",
+      "tags": []
+    },
+    {
+      "file": "IMG_2602.MOV",
+      "kind": "video",
+      "tags": []
+    },
+    {
+      "file": "IMG_2633.MOV",
+      "kind": "video",
+      "tags": [
+        "two figs"
+      ]
+    },
+    {
+      "file": "IMG_2638.MOV",
+      "kind": "video",
+      "tags": [
+        "two figs"
+      ]
+    },
+    {
+      "file": "IMG_2653.MOV",
+      "kind": "video",
+      "tags": []
+    },
+    {
+      "file": "IMG_2661.MOV",
+      "kind": "video",
+      "tags": []
+    },
+    {
+      "file": "IMG_2675.MOV",
+      "kind": "video",
+      "tags": []
+    },
+    {
+      "file": "IMG_2683.MOV",
+      "kind": "video",
+      "tags": []
+    },
+    {
+      "file": "IMG_2417.webp",
+      "kind": "image",
+      "tags": [
+        "dog in peepaw sweater",
+        "DOGS"
+      ]
+    },
+    {
+      "file": "IMG_2440.webp",
+      "kind": "image",
+      "tags": [
+        "dog in peepaw sweater",
+        "DOGS"
+      ]
+    },
+    {
+      "file": "IMG_2441.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_2443.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_2453.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_2458.webp",
+      "kind": "image",
+      "tags": [
+        "marshmellow"
+      ]
+    },
+    {
+      "file": "IMG_2464.webp",
+      "kind": "image",
+      "tags": [
+        "marshmellow",
+        "dog in peepaw sweater",
+        "DOGS"
+      ]
+    },
+    {
+      "file": "IMG_2475.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_2470.webp",
+      "kind": "image",
+      "tags": [
+        "dog in peepaw sweater",
+        "DOGS"
+      ]
+    },
+    {
+      "file": "IMG_2477.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_2481.webp",
+      "kind": "image",
+      "tags": [
+        "DOGS"
+      ]
+    },
+    {
+      "file": "IMG_2488.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_2493.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_2504.webp",
+      "kind": "image",
+      "tags": [
+        "DOGS",
+        "dog in peepaw sweater"
+      ]
+    },
+    {
+      "file": "IMG_2518.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_2529.webp",
+      "kind": "image",
+      "tags": [
+        "dog in peepaw sweater",
+        "DOGS"
+      ]
+    },
+    {
+      "file": "IMG_2546.webp",
+      "kind": "image",
+      "tags": [
+        "the earliest evidence of man-made fire"
+      ]
+    },
+    {
+      "file": "IMG_2534.webp",
+      "kind": "image",
+      "tags": [
+        "the earliest evidence of man-made fire"
+      ]
+    },
+    {
+      "file": "IMG_2552.webp",
+      "kind": "image",
+      "tags": [
+        "the earliest evidence of man-made fire",
+        "marshmellow"
+      ]
+    },
+    {
+      "file": "IMG_2585.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_2584.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_2604.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_2605.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_2606.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_2622.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_2636.webp",
+      "kind": "image",
+      "tags": [
+        "two figs"
+      ]
+    },
+    {
+      "file": "IMG_2629.webp",
+      "kind": "image",
+      "tags": [
+        "two figs"
+      ]
+    },
+    {
+      "file": "IMG_2641.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_2645.webp",
+      "kind": "image",
+      "tags": [
+        "DOGS"
+      ]
+    },
+    {
+      "file": "IMG_2647.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_2665.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_2690.webp",
+      "kind": "image",
+      "tags": []
+    }
+  ],
+  "music": "2048 - Michael Cera.mp3"
+}
