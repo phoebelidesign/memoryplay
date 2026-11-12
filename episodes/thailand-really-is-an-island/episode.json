@@ -6,7 +6,7 @@
     "kind": "video"
   },
   "settings": {
-    "blockSize": 8,
+    "blockSize": 9,
     "threshold": 29,
     "invert": false,
     "shuffleSeed": 92695810
