@@ -1,0 +1,612 @@
+{
+  "version": 1,
+  "title": "Thailand really is an island",
+  "layout": {
+    "file": "IMG_8364.MOV",
+    "kind": "video"
+  },
+  "settings": {
+    "blockSize": 8,
+    "threshold": 29,
+    "invert": false,
+    "shuffleSeed": 92695810
+  },
+  "media": [
+    {
+      "file": "IMG_7853.MOV",
+      "kind": "video",
+      "tags": []
+    },
+    {
+      "file": "IMG_8152.MOV",
+      "kind": "video",
+      "tags": []
+    },
+    {
+      "file": "IMG_8261.MOV",
+      "kind": "video",
+      "tags": [
+        "swimmingly"
+      ]
+    },
+    {
+      "file": "IMG_8302.MOV",
+      "kind": "video",
+      "tags": [
+        "swimmingly"
+      ]
+    },
+    {
+      "file": "IMG_8344.MOV",
+      "kind": "video",
+      "tags": []
+    },
+    {
+      "file": "IMG_8364.MOV",
+      "kind": "video",
+      "tags": [
+        "swimmingly"
+      ]
+    },
+    {
+      "file": "IMG_8380.MOV",
+      "kind": "video",
+      "tags": []
+    },
+    {
+      "file": "IMG_7372.webp",
+      "kind": "image",
+      "tags": [
+        "coconut"
+      ]
+    },
+    {
+      "file": "IMG_7373.webp",
+      "kind": "image",
+      "tags": [
+        "coconut"
+      ]
+    },
+    {
+      "file": "IMG_7379.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_7380.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_7389.webp",
+      "kind": "image",
+      "tags": [
+        "coconut"
+      ]
+    },
+    {
+      "file": "IMG_7448.webp",
+      "kind": "image",
+      "tags": [
+        "#meow",
+        "just for now"
+      ]
+    },
+    {
+      "file": "IMG_7467.webp",
+      "kind": "image",
+      "tags": [
+        "#meow"
+      ]
+    },
+    {
+      "file": "IMG_7485.webp",
+      "kind": "image",
+      "tags": [
+        "coconut"
+      ]
+    },
+    {
+      "file": "IMG_7622.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_7631.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_7632.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_7635.webp",
+      "kind": "image",
+      "tags": [
+        "just for now"
+      ]
+    },
+    {
+      "file": "IMG_7659.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_7667.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_7681.webp",
+      "kind": "image",
+      "tags": [
+        "#meow"
+      ]
+    },
+    {
+      "file": "IMG_7743.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_7730.webp",
+      "kind": "image",
+      "tags": [
+        "just for now"
+      ]
+    },
+    {
+      "file": "IMG_7789.webp",
+      "kind": "image",
+      "tags": [
+        "do you want a ticket 2 the moon?"
+      ]
+    },
+    {
+      "file": "IMG_7808.webp",
+      "kind": "image",
+      "tags": [
+        "do you want a ticket 2 the moon?",
+        "coconut"
+      ]
+    },
+    {
+      "file": "IMG_7812.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_7815.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_7830.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_7832.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_7863.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_7867.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_7914.webp",
+      "kind": "image",
+      "tags": [
+        "do you want a ticket 2 the moon?",
+        "coconut"
+      ]
+    },
+    {
+      "file": "IMG_7919.webp",
+      "kind": "image",
+      "tags": [
+        "#meow"
+      ]
+    },
+    {
+      "file": "IMG_7920.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_7922.webp",
+      "kind": "image",
+      "tags": [
+        "#meow"
+      ]
+    },
+    {
+      "file": "IMG_7926.webp",
+      "kind": "image",
+      "tags": [
+        "do you want a ticket 2 the moon?"
+      ]
+    },
+    {
+      "file": "IMG_7928.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_7956.webp",
+      "kind": "image",
+      "tags": [
+        "swimmingly"
+      ]
+    },
+    {
+      "file": "IMG_7976.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_7990.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_8005.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_8016.webp",
+      "kind": "image",
+      "tags": [
+        "#meow"
+      ]
+    },
+    {
+      "file": "IMG_8020.webp",
+      "kind": "image",
+      "tags": [
+        "#meow"
+      ]
+    },
+    {
+      "file": "IMG_8021.webp",
+      "kind": "image",
+      "tags": [
+        "#meow"
+      ]
+    },
+    {
+      "file": "IMG_8023.webp",
+      "kind": "image",
+      "tags": [
+        "#meow"
+      ]
+    },
+    {
+      "file": "IMG_8047.webp",
+      "kind": "image",
+      "tags": [
+        "swimmingly"
+      ]
+    },
+    {
+      "file": "IMG_8080.webp",
+      "kind": "image",
+      "tags": [
+        "#meow"
+      ]
+    },
+    {
+      "file": "IMG_8081.webp",
+      "kind": "image",
+      "tags": [
+        "#meow"
+      ]
+    },
+    {
+      "file": "IMG_8090.webp",
+      "kind": "image",
+      "tags": [
+        "coconut",
+        "just for now"
+      ]
+    },
+    {
+      "file": "IMG_8128.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_8145.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_8154.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_8176.webp",
+      "kind": "image",
+      "tags": [
+        "do you want a ticket 2 the moon?",
+        "#meow"
+      ]
+    },
+    {
+      "file": "IMG_8197.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_8181.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_8202.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_8209.webp",
+      "kind": "image",
+      "tags": [
+        "coconut"
+      ]
+    },
+    {
+      "file": "IMG_8201.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_8218.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_8250.webp",
+      "kind": "image",
+      "tags": [
+        "swimmingly"
+      ]
+    },
+    {
+      "file": "IMG_8267.webp",
+      "kind": "image",
+      "tags": [
+        "swimmingly"
+      ]
+    },
+    {
+      "file": "IMG_8269.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_8287.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_8335.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_8348.webp",
+      "kind": "image",
+      "tags": [
+        "swimmingly"
+      ]
+    },
+    {
+      "file": "IMG_8373.webp",
+      "kind": "image",
+      "tags": [
+        "swimmingly"
+      ]
+    },
+    {
+      "file": "IMG_8390.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_8400.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "B007118-R1-18-17A.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "B007118-R1-23-7A.webp",
+      "kind": "image",
+      "tags": [
+        "coconut"
+      ]
+    },
+    {
+      "file": "B007118-R2-19-4.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "B007118-R2-23-0.webp",
+      "kind": "image",
+      "tags": [
+        "coconut",
+        "just for now"
+      ]
+    },
+    {
+      "file": "B007118-R1-24-6A.webp",
+      "kind": "image",
+      "tags": [
+        "coconut"
+      ]
+    },
+    {
+      "file": "B007118-R3-14-22.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "B007118-R3-33-00.webp",
+      "kind": "image",
+      "tags": [
+        "just for now"
+      ]
+    },
+    {
+      "file": "B007118-R2-24-00.webp",
+      "kind": "image",
+      "tags": [
+        "coconut"
+      ]
+    },
+    {
+      "file": "thailand-1.webp",
+      "kind": "image",
+      "tags": [
+        "swimmingly",
+        "just for now"
+      ]
+    },
+    {
+      "file": "thailand-2.webp",
+      "kind": "image",
+      "tags": [
+        "do you want a ticket 2 the moon?",
+        "swimmingly"
+      ]
+    },
+    {
+      "file": "thailand-3.webp",
+      "kind": "image",
+      "tags": [
+        "do you want a ticket 2 the moon?"
+      ]
+    },
+    {
+      "file": "thailand-4.webp",
+      "kind": "image",
+      "tags": [
+        "just for now"
+      ]
+    },
+    {
+      "file": "thailand-5.webp",
+      "kind": "image",
+      "tags": [
+        "swimmingly"
+      ]
+    },
+    {
+      "file": "thailand-6.webp",
+      "kind": "image",
+      "tags": [
+        "just for now"
+      ]
+    },
+    {
+      "file": "thailand-7.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "thailand-8.webp",
+      "kind": "image",
+      "tags": [
+        "just for now"
+      ]
+    },
+    {
+      "file": "thailand-9.webp",
+      "kind": "image",
+      "tags": [
+        "just for now",
+        "swimmingly"
+      ]
+    },
+    {
+      "file": "thailand-10.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "thailand-11.webp",
+      "kind": "image",
+      "tags": [
+        "swimmingly",
+        "just for now"
+      ]
+    },
+    {
+      "file": "thailand-13.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "thailand-12.webp",
+      "kind": "image",
+      "tags": [
+        "swimmingly",
+        "just for now"
+      ]
+    },
+    {
+      "file": "thailand-14.webp",
+      "kind": "image",
+      "tags": [
+        "swimmingly",
+        "just for now"
+      ]
+    },
+    {
+      "file": "thailand-15.webp",
+      "kind": "image",
+      "tags": [
+        "swimmingly",
+        "just for now"
+      ]
+    },
+    {
+      "file": "thailand-16.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "thailand-17.webp",
+      "kind": "image",
+      "tags": [
+        "just for now"
+      ]
+    },
+    {
+      "file": "thailand-18.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "thailand-19.webp",
+      "kind": "image",
+      "tags": []
+    }
+  ],
+  "music": "Minus 8 - Nonhuman.mp3"
+}
