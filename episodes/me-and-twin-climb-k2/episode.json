@@ -1,0 +1,385 @@
+{
+  "version": 1,
+  "title": "Me and twin climb K2",
+  "layout": {
+    "file": "IMG_5036-2.mp4",
+    "kind": "video"
+  },
+  "settings": {
+    "blockSize": 15,
+    "threshold": 220,
+    "invert": true,
+    "shuffleSeed": 1
+  },
+  "media": [
+    {
+      "file": "IMG_4624.MOV",
+      "kind": "video",
+      "tags": [
+        "the last winter"
+      ]
+    },
+    {
+      "file": "IMG_4662.MOV",
+      "kind": "video",
+      "tags": [
+        "snow critters",
+        "bukhansan"
+      ]
+    },
+    {
+      "file": "IMG_4702.MOV",
+      "kind": "video",
+      "tags": [
+        "the last winter",
+        "bukhansan"
+      ]
+    },
+    {
+      "file": "IMG_4704.MOV",
+      "kind": "video",
+      "tags": [
+        "snow critters",
+        "bukhansan"
+      ]
+    },
+    {
+      "file": "IMG_4854.MOV",
+      "kind": "video",
+      "tags": [
+        "seoraksan"
+      ]
+    },
+    {
+      "file": "IMG_4906.MOV",
+      "kind": "video",
+      "tags": [
+        "seoraksan"
+      ]
+    },
+    {
+      "file": "IMG_5036.MOV",
+      "kind": "video",
+      "tags": []
+    },
+    {
+      "file": "B003595-R1-00-1A.webp",
+      "kind": "image",
+      "tags": [
+        "seoraksan"
+      ]
+    },
+    {
+      "file": "B003595-R1-01-2A.webp",
+      "kind": "image",
+      "tags": [
+        "seoraksan"
+      ]
+    },
+    {
+      "file": "B003595-R1-03-4A.webp",
+      "kind": "image",
+      "tags": [
+        "seoraksan"
+      ]
+    },
+    {
+      "file": "B003595-R1-06-7A.webp",
+      "kind": "image",
+      "tags": [
+        "sitting (on/in) a rock",
+        "seoraksan"
+      ]
+    },
+    {
+      "file": "B003595-R1-08-9A.webp",
+      "kind": "image",
+      "tags": [
+        "seoraksan"
+      ]
+    },
+    {
+      "file": "B003595-R1-07-8A.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4625.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4654.webp",
+      "kind": "image",
+      "tags": [
+        "snow critters",
+        "the last winter",
+        "bukhansan"
+      ]
+    },
+    {
+      "file": "IMG_4661.webp",
+      "kind": "image",
+      "tags": [
+        "snow critters",
+        "bukhansan"
+      ]
+    },
+    {
+      "file": "IMG_4683.webp",
+      "kind": "image",
+      "tags": [
+        "the last winter",
+        "bukhansan"
+      ]
+    },
+    {
+      "file": "IMG_4676.webp",
+      "kind": "image",
+      "tags": [
+        "the last winter",
+        "bukhansan"
+      ]
+    },
+    {
+      "file": "IMG_4703.webp",
+      "kind": "image",
+      "tags": [
+        "snow critters",
+        "bukhansan"
+      ]
+    },
+    {
+      "file": "IMG_4685.webp",
+      "kind": "image",
+      "tags": [
+        "the last winter",
+        "bukhansan"
+      ]
+    },
+    {
+      "file": "IMG_4705.webp",
+      "kind": "image",
+      "tags": [
+        "snow critters",
+        "bukhansan"
+      ]
+    },
+    {
+      "file": "IMG_4707.webp",
+      "kind": "image",
+      "tags": [
+        "snow critters",
+        "bukhansan"
+      ]
+    },
+    {
+      "file": "IMG_4708.webp",
+      "kind": "image",
+      "tags": [
+        "snow critters",
+        "bukhansan"
+      ]
+    },
+    {
+      "file": "IMG_4709.webp",
+      "kind": "image",
+      "tags": [
+        "bukhansan",
+        "snow critters"
+      ]
+    },
+    {
+      "file": "IMG_4721.webp",
+      "kind": "image",
+      "tags": [
+        "snow critters"
+      ]
+    },
+    {
+      "file": "IMG_4726.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4728.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4732.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4738.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4749.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4752.webp",
+      "kind": "image",
+      "tags": [
+        "find your true love"
+      ]
+    },
+    {
+      "file": "IMG_4765.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4754.webp",
+      "kind": "image",
+      "tags": [
+        "find your true love"
+      ]
+    },
+    {
+      "file": "IMG_4769.webp",
+      "kind": "image",
+      "tags": [
+        "handmade signs"
+      ]
+    },
+    {
+      "file": "IMG_4786.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4791.webp",
+      "kind": "image",
+      "tags": [
+        "handmade signs"
+      ]
+    },
+    {
+      "file": "IMG_4795.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4806.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4808.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4814.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4824.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4828.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4869.webp",
+      "kind": "image",
+      "tags": [
+        "seoraksan"
+      ]
+    },
+    {
+      "file": "IMG_4829.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4898.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4902.webp",
+      "kind": "image",
+      "tags": [
+        "seoraksan"
+      ]
+    },
+    {
+      "file": "IMG_4931.webp",
+      "kind": "image",
+      "tags": [
+        "sitting (on/in) a rock",
+        "seoraksan"
+      ]
+    },
+    {
+      "file": "IMG_4987.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4944.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5012.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5006.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_5022.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4651.webp",
+      "kind": "image",
+      "tags": []
+    },
+    {
+      "file": "IMG_4710.webp",
+      "kind": "image",
+      "tags": [
+        "the last winter",
+        "bukhansan"
+      ]
+    },
+    {
+      "file": "IMG_4883.webp",
+      "kind": "image",
+      "tags": [
+        "seoraksan"
+      ]
+    },
+    {
+      "file": "IMG_4981.webp",
+      "kind": "image",
+      "tags": [
+        "seoraksan"
+      ]
+    },
+    {
+      "file": "IMG_4955.webp",
+      "kind": "image",
+      "tags": [
+        "seoraksan"
+      ]
+    }
+  ],
+  "music": "Goodnight and go.mp3"
+}
