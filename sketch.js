@@ -72,6 +72,14 @@ const BG = 255;
 const LANDING_IMAGE = 'landing.jpg';
 let landingImg = null;
 
+// Speed. Cells are small, so drawing a full-size photo or video frame into each
+// one every frame wastes most of the work. These support the shortcuts below.
+let drawStamp = 0;          // counts draw() calls, to tell what was on screen recently
+let lastMaskTime = -1;      // the layout video's time when its mask was last sampled
+const IMAGE_LEVELS = [64, 128, 256, 512, 1024];   // longest sides of the shrunken copies kept per photo
+const VIDEO_FRAME_SIDES = [64, 128, 256, 512];    // longest sides a video's frame copy can have
+const OFFSCREEN_PAUSE_FRAMES = 45;                // a video unseen this long (about 1.5s) is paused
+
 // Three ways the page runs:
 //   index.html          the maker: upload files and build a collage.
 //   index.html#rabbit   the viewer: opens the episode in episodes/rabbit/.
@@ -91,7 +99,8 @@ let previewToken = 0;
 function setup() {
   const c = createCanvas(windowWidth, windowHeight);
   c.parent('stage');
-  pixelDensity(displayDensity());
+  pixelDensity(Math.min(displayDensity(), 2));   // 3x screens would triple the work for little gain
+  frameRate(30);
   buildOverlay();
   noLoop();
   redraw();
@@ -480,7 +489,9 @@ function handleLayoutFile(file) {
 function handleMediaFile(file) {
   if (file.type === 'image') {
     loadImage(srcFor(file), (img) => {
-      media.push({ kind: 'image', img, w: img.width, h: img.height, tags: [], ...fileInfo(file) });
+      const entry = { kind: 'image', img, w: img.width, h: img.height, tags: [], ...fileInfo(file) };
+      addImageLevels(entry);
+      media.push(entry);
       onMediaChanged();
     });
 
@@ -659,7 +670,7 @@ function sampleMaskFromImage() {
 // Video frames get averaged down to one pixel per cell, so a moving layout
 // resolves into the grid the same way a pixelated still does.
 function sampleMaskFromVideo() {
-  if (!layoutVid || layoutVid.elt.readyState < 2) return;
+  if (!layoutVid || layoutVid.elt.readyState < 2) return false;
   maskBuf.drawingContext.drawImage(layoutVid.elt, 0, 0, cols, rows);
   maskBuf.loadPixels();
   activeCount = 0;
@@ -671,6 +682,16 @@ function sampleMaskFromVideo() {
     mask[i] = on ? 1 : 0;
     if (on) activeCount++;
   }
+  return true;
+}
+
+// Called every frame, but only does the work when the video has moved on. A
+// paused video, or a frame that hasn't changed, keeps the mask it already has.
+function sampleMaskIfNewFrame() {
+  if (!layoutVid) return;
+  const t = layoutVid.elt.currentTime;
+  if (t === lastMaskTime) return;
+  if (sampleMaskFromVideo()) lastMaskTime = t;
 }
 
 // ---------------------------------------------------------------- ordering
@@ -731,6 +752,10 @@ function resetView() {
 
 function cellSize() { return baseCell * view.zoom; }
 
+// While the draw loop is running, a change shows on its next frame, so there's
+// no need to force a second one. With the loop stopped, draw once now.
+function requestDraw() { if (!isLooping()) redraw(); }
+
 function mouseWheel(e) {
   if (modalOpen || !layoutReady) return;
   const factor = Math.exp(-e.delta * 0.0015);
@@ -739,7 +764,7 @@ function mouseWheel(e) {
   view.x = mouseX - (mouseX - view.x) * applied;
   view.y = mouseY - (mouseY - view.y) * applied;
   view.zoom = next;
-  redraw();
+  requestDraw();
   return false;
 }
 
@@ -789,7 +814,7 @@ function mouseDragged() {
   view.x += mouseX - dragX;
   view.y += mouseY - dragY;
   dragX = mouseX; dragY = mouseY;
-  redraw();
+  requestDraw();
 }
 function mouseReleased() { dragging = false; }
 
@@ -823,36 +848,92 @@ function draw() {
     return;
   }
 
-  if (layoutKind === 'video') sampleMaskFromVideo();
-
-  updateVideoFrames();
+  drawStamp++;
+  if (layoutKind === 'video') sampleMaskIfNewFrame();
 
   if (!volFactor || volFactor.length !== media.length) volFactor = new Float32Array(media.length);
   volFactor.fill(0);
 
-  renderGrid(drawingContext, cellSize(), view.x, view.y, true, true);
+  renderGrid(drawingContext, cellSize(), view.x, view.y, true, true, pixelDensity());
+  managePlayback();
 
   applyVideoVolumes();
 }
 
-// Grabs each video's current frame into its own small offscreen canvas, once
-// per draw regardless of how many cells reuse that video. Skipped for the
-// brief instant right after a loop reset, so the cell keeps showing the last
-// good frame instead of the black frame some browsers produce at that point.
-function updateVideoFrames() {
+// A video's cell draws from a copy of its current frame. The copy is made only
+// for videos actually on screen, once per draw however many cells use it, and
+// only as large as the cells need (a 10px cell has no use for a 1080p frame).
+// It's skipped for the instant right after a loop restart, so the cell keeps its
+// last good frame instead of the black frame some browsers produce at that point.
+function refreshVideoFrame(item, neededPx) {
+  if (item.frameStamp === drawStamp) return;
+  item.frameStamp = drawStamp;
+
+  const v = item.el.elt;
+  if (v.readyState < 2 || !item.w) return;
+  if (v.currentTime < 0.08) return;
+
+  const longest = Math.max(item.w, item.h);
+  const side = VIDEO_FRAME_SIDES.find((sd) => sd >= neededPx && sd < longest) || longest;
+  const scale = side / longest;
+  const w = Math.max(1, Math.round(item.w * scale)), h = Math.max(1, Math.round(item.h * scale));
+
+  if (!item.frameCanvas) {
+    item.frameCanvas = document.createElement('canvas');
+    item.frameCtx = item.frameCanvas.getContext('2d');
+  }
+  if (item.frameCanvas.width !== w || item.frameCanvas.height !== h) {
+    item.frameCanvas.width = w;
+    item.frameCanvas.height = h;
+  }
+  item.frameCtx.drawImage(v, 0, 0, w, h);
+}
+
+// Videos only play while they're on screen. One that hasn't been drawn for a
+// moment is paused, and it picks up again as soon as it's back in view, which
+// saves a lot of decoding when zoomed in on a few of many videos.
+function managePlayback() {
   for (const m of media) {
     if (m.kind !== 'video' || !m.el || !m.w) continue;
-    const vEl = m.el.elt;
-    if (vEl.readyState < 2) continue;
-    if (vEl.currentTime < 0.08) continue;  // just looped — reuse last frame
-    if (!m.frameCanvas) {
-      m.frameCanvas = document.createElement('canvas');
-      m.frameCanvas.width = m.w;
-      m.frameCanvas.height = m.h;
-      m.frameCtx = m.frameCanvas.getContext('2d');
+    const v = m.el.elt;
+    const unseenFor = drawStamp - (m.lastSeen === undefined ? -OFFSCREEN_PAUSE_FRAMES * 2 : m.lastSeen);
+    if (unseenFor <= 1) {
+      if (v.paused) v.play().catch(() => {});
+    } else if (unseenFor > OFFSCREEN_PAUSE_FRAMES && !v.paused) {
+      v.pause();
     }
-    m.frameCtx.drawImage(vEl, 0, 0, m.w, m.h);
   }
+}
+
+// Photos are drawn into cells far smaller than they are, so each keeps a few
+// pre-shrunk copies, made once as it loads. A cell uses the smallest copy that's
+// still at least as big as the cell, and zooming right in uses the original.
+// Each copy is made from the one above it, so no single step is a huge reduction.
+function addImageLevels(entry) {
+  const full = entry.img && entry.img.canvas;
+  if (!full) return;
+  const longest = Math.max(entry.w, entry.h);
+  entry.levels = [];
+  let prev = full;
+  for (const side of [...IMAGE_LEVELS].reverse()) {
+    if (side >= longest) continue;
+    const scale = side / longest;
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(entry.w * scale));
+    c.height = Math.max(1, Math.round(entry.h * scale));
+    const cx = c.getContext('2d');
+    cx.imageSmoothingQuality = 'high';
+    cx.drawImage(prev, 0, 0, c.width, c.height);
+    entry.levels.unshift({ side, canvas: c });   // smallest first
+    prev = c;
+  }
+}
+
+function imageSourceFor(item, neededPx) {
+  if (item.levels) {
+    for (const lvl of item.levels) if (lvl.side >= neededPx) return lvl.canvas;
+  }
+  return item.img.canvas;
 }
 
 // Louder the bigger and more central a video's cell is on screen; silent the
@@ -870,9 +951,9 @@ function applyVideoVolumes() {
 // full resolution, so zooming in reveals real detail rather than a blur.
 // trackAudio (main view only) records how big and how central each visible
 // video's cell is, which is what its volume ends up following.
-function renderGrid(ctx, cs, ox, oy, cull, trackAudio) {
+function renderGrid(ctx, cs, ox, oy, cull, trackAudio, dpr) {
   ctx.save();
-  ctx.imageSmoothingQuality = 'high';
+  ctx.imageSmoothingQuality = 'medium';   // 'high' is costly, and the shrunken copies don't need it
 
   const cw = cull ? width : cs * cols;
   const ch = cull ? height : cs * rows;
@@ -902,7 +983,9 @@ function renderGrid(ctx, cs, ox, oy, cull, trackAudio) {
       const item = media.length ? media[assignment[i]] : null;
       if (!itemMatchesFilter(item)) continue;
 
-      const src = sourceFor(item);
+      if (trackAudio && item && item.kind === 'video') item.lastSeen = drawStamp;
+      // Cells are square, so a tile's longest side is the cell's side, in device pixels.
+      const src = sourceFor(item, Math.max(w, h) * (dpr || 1));
 
       if (!src) {
         ctx.fillStyle = '#141414';
@@ -927,10 +1010,11 @@ function renderGrid(ctx, cs, ox, oy, cull, trackAudio) {
   ctx.restore();
 }
 
-function sourceFor(item) {
+function sourceFor(item, neededPx) {
   if (!item) return null;
-  if (item.kind === 'image') return item.img ? item.img.canvas : null;
+  if (item.kind === 'image') return item.img ? imageSourceFor(item, neededPx) : null;
   if (item.kind === 'video') {
+    refreshVideoFrame(item, neededPx);
     if (item.frameCanvas) return item.frameCanvas;
     if (item.el && item.el.elt.readyState >= 2 && item.w > 0) return item.el.elt;  // before the first cached frame
   }
@@ -951,7 +1035,8 @@ function exportHiRes(targetCell = 96) {
   const g = createGraphics(w, h);
   g.pixelDensity(1);
   g.background(BG);
-  renderGrid(g.drawingContext, cs, 0, 0, false, false);
+  drawStamp++;   // so videos refresh their frame at the export's size
+  renderGrid(g.drawingContext, cs, 0, 0, false, false, 1);
   save(g, 'dont-forget-about-me.png');
   g.remove();
   setStatus(`Saved at ${w} &times; ${h}.`);
@@ -1228,7 +1313,11 @@ function loadImageEntry(url, name) {
   return new Promise((resolve, reject) => {
     loadImage(
       url,
-      (img) => resolve({ kind: 'image', img, w: img.width, h: img.height, tags: [], name, size: 0 }),
+      (img) => {
+        const entry = { kind: 'image', img, w: img.width, h: img.height, tags: [], name, size: 0 };
+        addImageLevels(entry);
+        resolve(entry);
+      },
       () => reject(new EpisodeError(`Couldn't load ${name}.`))
     );
   });
@@ -1253,8 +1342,7 @@ function loadVideoEntry(url, name) {
     el.elt.addEventListener('loadedmetadata', () => {
       entry.w = el.elt.videoWidth;
       entry.h = el.elt.videoHeight;
-      el.elt.play().catch(() => {});
-      resolve(entry);
+      resolve(entry);   // managePlayback() starts it once it's on screen
     }, { once: true });
     onVideoError(el, () => reject(new EpisodeError(`Couldn't load ${name}.`)));
   });
