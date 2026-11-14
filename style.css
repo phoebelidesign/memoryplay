@@ -17,6 +17,7 @@ html, body {
 #stage canvas {
   display: block;
   cursor: grab;
+  touch-action: none;
 }
 #stage canvas:active {
   cursor: grabbing;
@@ -52,7 +53,40 @@ html, body {
 #menuBtn { left: 20px; }
 #soundBtn { right: 20px; font-size: 14px; }
 
-/* controls panel */
+#actions {
+  position: fixed;
+  right: 20px;
+  bottom: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 20;
+}
+
+.actionBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease;
+}
+.actionBtn:active {
+  background: #000;
+  color: #fff;
+}
+
+@media (hover: hover) {
+  .actionBtn:hover {
+    background: #000;
+    color: #fff;
+  }
+}
 
 #panel {
   position: fixed;

@@ -47,6 +47,7 @@ let shuffleSeed = 1;
 let view = { x: 0, y: 0, zoom: 1 };
 let baseCell = 1;
 let dragging = false, dragX = 0, dragY = 0;
+let usingTouch = false;   // true after a touch, false after a mouse press (see setupTouchGestures)
 
 let layoutVideoPlaying = true;  // spacebar toggles this, for a video "think of a memory" layout
 
@@ -90,6 +91,14 @@ const VIEWER_MODE = EPISODE_SLUG !== '';
 const AUTHOR_MODE = !VIEWER_MODE && new URLSearchParams(location.search).has('author');
 const EPISODES_DIR = 'episodes';
 
+// Phones and tablets: touch is the main input. They get pinch-to-zoom, and the
+// poem on the landing screen rather than the landing image.
+const IS_MOBILE = window.matchMedia ? window.matchMedia('(pointer: coarse)').matches : false;
+
+// On-screen buttons for what the keyboard does (play/pause, shuffle, reset view,
+// download). Set to true to show them on desktop as well.
+const SHOW_ACTION_BUTTONS = IS_MOBILE;
+
 let viewerMessage = '';      // drawn on the canvas, in place of the poem, while an episode loads
 let episodePreviewMask = null;
 let previewToken = 0;
@@ -99,6 +108,8 @@ let previewToken = 0;
 function setup() {
   const c = createCanvas(windowWidth, windowHeight);
   c.parent('stage');
+  const canvasEl = document.querySelector('#stage canvas');
+  if (canvasEl) setupTouchGestures(canvasEl);
   pixelDensity(Math.min(displayDensity(), 2));   // 3x screens would triple the work for little gain
   frameRate(30);
   buildOverlay();
@@ -107,7 +118,7 @@ function setup() {
   if (VIEWER_MODE) {
     document.body.classList.add('viewer');
     startViewer();
-  } else {
+  } else if (!IS_MOBILE) {
     loadImage(LANDING_IMAGE, (img) => { landingImg = img; if (!layoutReady) redraw(); }, () => {});
   }
 }
@@ -187,7 +198,7 @@ function buildOverlay() {
   if (!AUTHOR_MODE) ui.exportBtn.style('display', 'none');
   r.style('display', 'none');
 
-  createDiv('Scroll to zoom, drag to move. Press spacebar to play/pause, S to shuffle, 0 to reset view, D to download a large image.' + (VIEWER_MODE ? '' : ' Double-click a pixel to tag it.'))
+  createDiv(IS_MOBILE ? 'Pinch to zoom, drag to move. The buttons on the right play or pause the memory, shuffle, reset the view and download an image.' : 'Scroll to zoom, drag to move. Press spacebar to play/pause, S to shuffle, 0 to reset view, D to download a large image.' + (VIEWER_MODE ? '' : ' Double-click a pixel to tag it.'))
     .class('hint').parent(panel);
 
   ui.status = createDiv('').class('status').parent(panel);
@@ -196,6 +207,7 @@ function buildOverlay() {
   ui.soundBtn = createDiv('♪').id('soundBtn').parent('shell');
   ui.soundBtn.mousePressed(toggleSound);
 
+  buildActionButtons();
   buildModal();
 }
 
@@ -385,6 +397,7 @@ function toggleLayoutVideo() {
   layoutVideoPlaying = !layoutVideoPlaying;
   if (layoutVideoPlaying) layoutVid.elt.play().catch(() => {});
   else layoutVid.elt.pause();
+  updatePlayPauseIcon();
 }
 
 function toggleInvert() {
@@ -397,6 +410,44 @@ function toggleInvert() {
 // ---------------------------------------------------------------- sound
 
 const PAUSE_ICON = '<svg width="13" height="13" viewBox="0 0 13 13"><line x1="4" y1="1.5" x2="4" y2="11.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><line x1="9" y1="1.5" x2="9" y2="11.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+const PLAY_ICON = '<svg width="13" height="13" viewBox="0 0 13 13"><path d="M3.8 1.8 L10.6 6.5 L3.8 11.2 Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>';
+const SHUFFLE_ICON = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 4 H4 L9.5 10 H12"/><path d="M1.5 10 H4 L5.8 8 M8.2 6 L9.5 4 H12"/><path d="M10.5 2.5 L12.2 4 L10.5 5.5"/><path d="M10.5 8.5 L12.2 10 L10.5 11.5"/></svg>';
+const RESET_ICON = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 5 V1.5 H5"/><path d="M9 1.5 H12.5 V5"/><path d="M12.5 9 V12.5 H9"/><path d="M5 12.5 H1.5 V9"/></svg>';
+const DOWNLOAD_ICON = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M7 1.5 V9"/><path d="M3.8 6 L7 9.2 L10.2 6"/><path d="M2 12.2 H12"/></svg>';
+
+// Small buttons for what the keyboard does, stacked above the sound button.
+// They appear once a layout is loaded; play/pause only for a video layout.
+function buildActionButtons() {
+  if (!SHOW_ACTION_BUTTONS) return;
+  const box = createDiv().id('actions').parent('shell');
+  box.style('display', 'none');
+  ui.actionsBox = box;
+
+  const add = (label, icon, handler) => {
+    const b = createDiv(icon).class('actionBtn').parent(box);
+    b.attribute('role', 'button');
+    b.attribute('aria-label', label);
+    b.attribute('title', label);
+    b.elt.addEventListener('click', () => handler());   // no event passed on: exportHiRes takes an optional size
+    return b;
+  };
+  ui.playBtn = add('Play or pause the memory', PAUSE_ICON, toggleLayoutVideo);
+  add('Shuffle', SHUFFLE_ICON, reshuffle);
+  add('Reset view', RESET_ICON, resetView);
+  add('Download image', DOWNLOAD_ICON, exportHiRes);
+}
+
+function refreshActionButtons() {
+  if (!ui.actionsBox) return;
+  ui.actionsBox.style('display', layoutReady ? 'flex' : 'none');
+  ui.playBtn.style('display', layoutKind === 'video' ? 'flex' : 'none');
+  updatePlayPauseIcon();
+}
+
+// Shows what pressing it would do: pause while playing, play while paused.
+function updatePlayPauseIcon() {
+  if (ui.playBtn) ui.playBtn.html(layoutVideoPlaying ? PAUSE_ICON : PLAY_ICON);
+}
 
 function toggleSound() {
   soundOn = !soundOn;
@@ -595,6 +646,7 @@ function setupGrid() {
   refreshMask();
   fitViewToGrid();
   refreshSaveRow();
+  refreshActionButtons();
   setStatus(`${cols} &times; ${rows} grid, ${activeCount} cells to fill.`);
 }
 
@@ -806,11 +858,11 @@ async function doubleClicked() {
 }
 
 function mousePressed() {
-  if (modalOpen || overlayHit()) return;
+  if (usingTouch || modalOpen || overlayHit()) return;
   dragging = true; dragX = mouseX; dragY = mouseY;
 }
 function mouseDragged() {
-  if (!dragging || modalOpen) return;
+  if (usingTouch || !dragging || modalOpen) return;
   view.x += mouseX - dragX;
   view.y += mouseY - dragY;
   dragX = mouseX; dragY = mouseY;
@@ -818,10 +870,76 @@ function mouseDragged() {
 }
 function mouseReleased() { dragging = false; }
 
+// ---- touch: one finger drags, two fingers pinch to zoom ------------------------------------------
+// Pointer events on the canvas itself (touch-action: none in style.css stops the
+// browser panning or zooming the whole page instead). Mouse input stays with the
+// handlers above; usingTouch stops those reacting to a touch as well.
+
+const touchPoints = new Map();   // pointer id -> its latest { x, y }
+let lastPinch = null;            // { dist, x, y } from the previous two-finger reading
+
+function pinchReading() {
+  const [a, b] = [...touchPoints.values()];
+  return { dist: Math.hypot(a.x - b.x, a.y - b.y), x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+}
+
+// Zooms about the midpoint between the fingers, and follows it as it moves.
+function applyPinch(prev, now) {
+  if (prev.dist < 1) return;
+  const next = constrain(view.zoom * (now.dist / prev.dist), 0.2, 400);
+  const applied = next / view.zoom;
+  view.x = now.x - (prev.x - view.x) * applied;
+  view.y = now.y - (prev.y - view.y) * applied;
+  view.zoom = next;
+}
+
+function setupTouchGestures(el) {
+  const point = (e) => {
+    const r = el.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  };
+
+  el.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse') { usingTouch = false; return; }
+    usingTouch = true;
+    if (modalOpen || !layoutReady) return;
+    try { el.setPointerCapture(e.pointerId); } catch (err) { /* not a live pointer */ }
+    touchPoints.set(e.pointerId, point(e));
+    lastPinch = touchPoints.size === 2 ? pinchReading() : null;
+    e.preventDefault();
+  });
+
+  el.addEventListener('pointermove', (e) => {
+    if (!touchPoints.has(e.pointerId)) return;
+    const before = touchPoints.get(e.pointerId);
+    const now = point(e);
+    touchPoints.set(e.pointerId, now);
+
+    if (touchPoints.size === 1) {
+      view.x += now.x - before.x;
+      view.y += now.y - before.y;
+    } else if (touchPoints.size === 2) {
+      const reading = pinchReading();
+      if (lastPinch) applyPinch(lastPinch, reading);
+      lastPinch = reading;
+    }
+    requestDraw();
+    e.preventDefault();
+  });
+
+  // Lifting one of two fingers leaves the other dragging, with no jump.
+  const end = (e) => {
+    if (!touchPoints.delete(e.pointerId)) return;
+    lastPinch = touchPoints.size === 2 ? pinchReading() : null;
+  };
+  el.addEventListener('pointerup', end);
+  el.addEventListener('pointercancel', end);
+}
+
 // Ignore canvas drag/zoom-origin clicks that actually landed on overlay UI.
 function overlayHit() {
   const el = document.elementFromPoint(mouseX, mouseY);
-  return el && el.closest && el.closest('#panel, #menuBtn, #soundBtn');
+  return el && el.closest && el.closest('#panel, #menuBtn, #soundBtn, #actions');
 }
 
 // ---------------------------------------------------------------- drawing
@@ -842,9 +960,12 @@ function draw() {
     fill(40);
     textAlign(CENTER, CENTER);
     textFont('Times New Roman');
-    textSize(16);
-    textLeading(36);
-    text(VIEWER_MODE ? viewerMessage : 'Step 1.\nThink of a memory and note what appears immediately in your mind\n(this could be anything:\na mountaintop\na spiral staircase\nwindchimes, a breeze, warmth\nsea urchins, a cheese knife\na mandarin peel, a snail trail\nnail clippers\nsisters)\n...and upload an image/video that represents it.\n\nStep 2.\nPiece together everything else that the memory is made up of, and upload all of these.\n\nStep 3.\nUpload some music, if desired (always a good idea).\n\nStep 4.\nPlay :)', width / 2, height / 2);
+    const message = VIEWER_MODE ? viewerMessage : LANDING_POEM;
+    // Shrink the text if it wouldn't fit the screen, as on a phone.
+    const fit = Math.max(0.6, Math.min(1, (height * 0.9) / (message.split('\n').length * 36)));
+    textSize(16 * fit);
+    textLeading(36 * fit);
+    text(message, width / 2, height / 2);
     return;
   }
 
@@ -1027,8 +1148,10 @@ function exportHiRes(targetCell = 96) {
   if (!layoutReady) return;
 
   // Keep the buffer inside what browsers will allocate.
-  const maxSide = 8192;
-  const cs = Math.max(1, Math.floor(Math.min(targetCell, maxSide / cols, maxSide / rows)));
+  const maxSide = IS_MOBILE ? 4096 : 8192;
+  // iPhones cap a canvas at about 16 megapixels, and a bigger one comes out blank.
+  const maxArea = IS_MOBILE ? 16e6 : Infinity;
+  const cs = Math.max(1, Math.floor(Math.min(targetCell, maxSide / cols, maxSide / rows, Math.sqrt(maxArea / (cols * rows)))));
   const w = cols * cs, h = rows * cs;
 
   setStatus(`Saving at ${w} &times; ${h}…`);
