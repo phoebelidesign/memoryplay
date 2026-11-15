@@ -72,6 +72,7 @@ const BG = 255;
 // to index.html; if it's missing, the poem is shown instead.
 const LANDING_IMAGE = 'landing.jpg';
 let landingImg = null;
+const LANDING_POEM = 'Step 1: Think of a memory and note what appears immediately in your mind.\nUpload an image/video that represents it.\n\nStep 2: Upload all the other images/videos that make up this memory.\n\nStep 3: Upload some music, if desired (always a good idea).\n\nStep 4: Play :)';
 
 // Speed. Cells are small, so drawing a full-size photo or video frame into each
 // one every frame wastes most of the work. These support the shortcuts below.
