@@ -20,6 +20,7 @@ let activeCount = 0;
 let blockSize = 12;          // source pixels per grid cell
 let cols = 0, rows = 0;
 const DEFAULT_BLOCK_MIN = 7, DEFAULT_BLOCK_MAX = 12;
+const BLOCK_SLIDER_MIN = 4, BLOCK_SLIDER_MAX = 40;
 function clampDefaultBlock(v) { return constrain(Math.round(v), DEFAULT_BLOCK_MIN, DEFAULT_BLOCK_MAX); }
 
 // A pixelated layout has real blocks of some size (say 37px). Cells of 7-12px
@@ -72,7 +73,7 @@ const BG = 255;
 // to index.html; if it's missing, the poem is shown instead.
 const LANDING_IMAGE = 'landing.jpg';
 let landingImg = null;
-const LANDING_POEM = 'Step 1: Think of a memory and note what appears immediately in your mind.\nUpload an image/video that represents it.\n\nStep 2: Upload all the other images/videos that make up this memory.\n\nStep 3: Upload some music, if desired (always a good idea).\n\nStep 4: Play :)';
+const LANDING_POEM = 'Step 1: Think of a memory and note what appears immediately in your mind.\nUpload an image/video that represents it.\n\nStep 2: Piece together everything else that the memory is made up of, and upload all of these.\n\nStep 3: Upload some music, if desired (always a good idea).\n\nStep 4: Play :)';
 
 // Speed. Cells are small, so drawing a full-size photo or video frame into each
 // one every frame wastes most of the work. These support the shortcuts below.
@@ -165,12 +166,9 @@ function buildOverlay() {
   ui.audioIn.elt.setAttribute('accept', 'audio/*');
 
   r = makeRow('Block size', true);
-  ui.block = createInput(String(blockSize), 'number').parent(r);
-  ui.block.size(60);
-  ui.block.input(() => {
-    const v = parseInt(ui.block.value(), 10);
-    if (v >= 1) { blockSize = v; setupGrid(); }
-  });
+  ui.block = createSlider(BLOCK_SLIDER_MIN, BLOCK_SLIDER_MAX, blockSize, 1).parent(r);
+  ui.blockValue = createSpan(String(blockSize)).class('sliderValue').parent(r);
+  ui.block.input(onBlockSlider);
   ui.blockNote = createSpan('').class('note').parent(r);
 
   r = makeRow('Darkness', true);
@@ -368,6 +366,29 @@ function togglePanel() {
   ui.menuBtn.html(panelOpen ? '\u00d7' : '+');
 }
 
+let gridRebuildQueued = false;
+
+// Dragging the slider fires a stream of events, and rebuilding the grid is
+// the costly part, so it happens at most once per frame however many arrive.
+function queueGridRebuild() {
+  if (gridRebuildQueued) return;
+  gridRebuildQueued = true;
+  requestAnimationFrame(() => { gridRebuildQueued = false; setupGrid(); });
+}
+
+function onBlockSlider() {
+  blockSize = Number(ui.block.value());
+  ui.blockValue.html(String(blockSize));   // the number follows the handle straight away
+  queueGridRebuild();
+}
+
+// Moves the slider and its number to the current block size, e.g. after a
+// layout loads and one is picked for it.
+function syncBlockControl() {
+  ui.block.value(blockSize);
+  ui.blockValue.html(String(blockSize));
+}
+
 function setStatus(msg) { if (ui.status) ui.status.html(msg); }
 
 // For text that may contain a visitor's own words or a file name.
@@ -498,7 +519,7 @@ function handleLayoutFile(file) {
       if (layoutVid) { layoutVid.remove(); layoutVid = null; }
       layoutW = img.width; layoutH = img.height;
       blockSize = detectBlockSize(img);
-      ui.block.value(String(blockSize));
+      syncBlockControl();
       ui.blockNote.html(`detected from a ${img.width} &times; ${img.height} image`);
       layoutReady = true;
       setupGrid();
@@ -524,7 +545,7 @@ function handleLayoutFile(file) {
       // Video frames aren't pre-pixelated, so there's no real grid to detect —
       // just pick something in the sane default range. Editable in the field.
       blockSize = clampDefaultBlock(layoutW / 64);
-      ui.block.value(String(blockSize));
+      syncBlockControl();
       ui.blockNote.html(`from a ${layoutW} &times; ${layoutH} video`);
       layoutReady = true;
       setupGrid();

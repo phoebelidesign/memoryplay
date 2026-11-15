@@ -162,6 +162,11 @@ body.viewer .editOnly {
   max-width: 100%;
 }
 
+.sliderValue {
+  font-size: 13px;
+  min-width: 2ch;
+}
+
 #panel input[type="number"] {
   font-family: inherit;
   font-size: 13px;
