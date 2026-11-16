@@ -108,10 +108,13 @@ let previewToken = 0;
 // ---------------------------------------------------------------- setup
 
 function setup() {
-  const c = createCanvas(windowWidth, windowHeight);
+  const size = viewSize();
+  const c = createCanvas(size.w, size.h);
   c.parent('stage');
   const canvasEl = document.querySelector('#stage canvas');
   if (canvasEl) setupTouchGestures(canvasEl);
+  // Phones can report the old window size for a moment after a rotation, so check again once it settles.
+  window.addEventListener('orientationchange', () => setTimeout(windowResized, 300));
   pixelDensity(Math.min(displayDensity(), 2));   // 3x screens would triple the work for little gain
   frameRate(30);
   buildOverlay();
@@ -125,8 +128,20 @@ function setup() {
   }
 }
 
+// The size of the area the canvas fills, read from the page itself. Phones can
+// report a stale window.innerWidth right after a rotation or as the address bar
+// moves, and a canvas wider than the screen cuts off whatever is centred in it.
+function viewSize() {
+  const shell = document.getElementById('shell');
+  return {
+    w: (shell && shell.clientWidth) || windowWidth,
+    h: (shell && shell.clientHeight) || windowHeight,
+  };
+}
+
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+  const size = viewSize();
+  resizeCanvas(size.w, size.h);
   fitViewToGrid();
   redraw();
 }
@@ -966,6 +981,22 @@ function overlayHit() {
 
 // ---------------------------------------------------------------- drawing
 
+// Splits a message into lines no wider than maxWidth at the current text size,
+// keeping its own line breaks and breaking only between words.
+function wrapText(message, maxWidth) {
+  const out = [];
+  for (const paragraph of message.split('\n')) {
+    let line = '';
+    for (const word of paragraph.split(' ')) {
+      const trial = line ? line + ' ' + word : word;
+      if (line && textWidth(trial) > maxWidth) { out.push(line); line = word; }
+      else line = trial;
+    }
+    out.push(line);
+  }
+  return out;
+}
+
 // Scales an image to fill the whole canvas, centred, cropping whatever overflows.
 function drawCover(img) {
   const scale = Math.max(width / img.width, height / img.height);
@@ -983,11 +1014,16 @@ function draw() {
     textAlign(CENTER, CENTER);
     textFont('Times New Roman');
     const message = VIEWER_MODE ? viewerMessage : LANDING_POEM;
-    // Shrink the text if it wouldn't fit the screen, as on a phone.
-    const fit = Math.max(0.6, Math.min(1, (height * 0.9) / (message.split('\n').length * 36)));
+    // Fit the text to the screen, as on a phone: long lines wrap at word breaks,
+    // and what still doesn't fit (a very long file name) or has too many lines
+    // for the height is shrunk, so nothing runs off an edge.
+    textSize(16);
+    const lines = wrapText(message, width * 0.9);
+    const widest = Math.max(1, ...lines.map((l) => textWidth(l)));
+    const fit = Math.max(0.5, Math.min(1, (width * 0.9) / widest, (height * 0.9) / (lines.length * 36)));
     textSize(16 * fit);
     textLeading(36 * fit);
-    text(message, width / 2, height / 2);
+    text(lines.join('\n'), width / 2, height / 2);
     return;
   }
 
